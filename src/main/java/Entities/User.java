@@ -190,14 +190,12 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "Entities.User{" +
-                "id=" + id +
-                ", accessMode=" + accessMode +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", email='" + email + '\'' +
-                ", theme='" + theme + '\'' +
-                ", language='" + language + '\'' +
-                '}';
+        return id +
+                "#" + accessMode +
+                "#" + username +
+                "#" + password +
+                "#" + email +
+                "#" + theme +
+                "#" + language;
     }
 }

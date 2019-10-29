@@ -638,31 +638,29 @@ public class Client implements Serializable {
 
     @Override
     public String toString() {
-        return "Client{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", patronymic='" + patronymic + '\'' +
-                ", birthDate=" + birthDate +
-                ", passportSeries='" + passportSeries + '\'' +
-                ", passportNumber='" + passportNumber + '\'' +
-                ", issuedBy='" + issuedBy + '\'' +
-                ", issuedDate=" + issuedDate +
-                ", birthPlace='" + birthPlace + '\'' +
-                ", actualResidenceCity=" + actualResidenceCity +
-                ", actualResidenceAddress='" + actualResidenceAddress + '\'' +
-                ", homeNumber='" + homeNumber + '\'' +
-                ", mobileNumber='" + mobileNumber + '\'' +
-                ", email='" + email + '\'' +
-                ", job='" + job + '\'' +
-                ", position='" + position + '\'' +
-                ", registrationCity=" + registrationCity +
-                ", maritalStatus=" + maritalStatus +
-                ", citizenship=" + citizenship +
-                ", disability=" + disability +
-                ", retiree=" + retiree +
-                ", monthlyIncome=" + monthlyIncome +
-                ", idNumber='" + idNumber + '\'' +
-                '}';
+        return id +
+                "#" + name +
+                "#" + surname +
+                "#" + patronymic +
+                "#" + birthDate +
+                "#" + passportSeries +
+                "#" + passportNumber +
+                "#" + issuedBy +
+                "#" + issuedDate +
+                "#" + birthPlace +
+                "#" + actualResidenceCity +
+                "#" + actualResidenceAddress +
+                "#" + homeNumber +
+                "#" + mobileNumber +
+                "#" + email +
+                "#" + job +
+                "#" + position +
+                "#" + registrationCity +
+                "#" + maritalStatus +
+                "#" + citizenship +
+                "#" + disability +
+                "#" + retiree +
+                "#" + monthlyIncome +
+                "#" + idNumber;
     }
 }

@@ -58,8 +58,16 @@ public class Server implements TCPConnectionListener {
 
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
-        if (value.charAt(0) == 'U')
-            System.out.println(value);
+        if(value.equals("init")) {
+            tcpConnection.sendString(usersData.size() + " USERS:");
+            for (User u : usersData)
+                tcpConnection.sendString(u.toString());
+
+            tcpConnection.sendString(clientsData.size() + " CLIENTS:");
+            for (Client c : clientsData)
+                tcpConnection.sendString(c.toString());
+            tcpConnection.sendString("END");
+        }
     }
 
     @Override
