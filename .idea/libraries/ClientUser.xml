@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ClientUser">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../JavaFX11-example/target/classes/sample/Controls/ClientUser.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
