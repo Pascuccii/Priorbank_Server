@@ -73,7 +73,6 @@ public class Client implements Serializable {
     public void setIdDB(DatabaseConnection conn, int id) {
         this.id = id;
     }
-
     public void setNameDB(DatabaseConnection conn, String name) {
         name = name.trim();
         if (name.matches("[а-яА-Я]{2,20}")) {
@@ -89,7 +88,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setSurnameDB(DatabaseConnection conn, String surname) {
         surname = surname.trim();
         if (surname.matches("[а-яА-Я]{2,20}")) {
@@ -105,7 +103,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setPatronymicDB(DatabaseConnection conn, String patronymic) {
         patronymic = patronymic.trim();
         if (patronymic.matches("[а-яА-Я]{2,30}")) {
@@ -121,7 +118,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setBirthDateDB(DatabaseConnection conn, String birthDate) {
         birthDate = birthDate.trim();
         if (birthDate.matches("^\\d{4}[-/](((0)[0-9])|((1)[0-2]))[-/]([0-2][0-9]|(3)[0-1])$")) {
@@ -137,7 +133,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setPassportSeriesDB(DatabaseConnection conn, String passportSeries) {
         this.passportSeries = passportSeries;
         try {
@@ -150,7 +145,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setPassportNumberDB(DatabaseConnection conn, String passportNumber) {
         passportNumber = passportNumber.trim();
         if (passportNumber.matches("^\\d{7}$")) {
@@ -166,7 +160,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setIssuedByDB(DatabaseConnection conn, String issuedBy) {
         this.issuedBy = issuedBy;
         try {
@@ -179,7 +172,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setIssuedDateDB(DatabaseConnection conn, String issuedDate) {
         issuedDate = issuedDate.trim();
         if (issuedDate.matches("^\\d{4}[-/](((0)[0-9])|((1)[0-2]))[-/]([0-2][0-9]|(3)[0-1])$")) {
@@ -195,7 +187,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setBirthPlaceDB(DatabaseConnection conn, String birthPlace) {
         boolean exists = true;
         /*try {
@@ -216,7 +207,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setActualResidenceCityDB(DatabaseConnection conn, String actualResidenceCity) {
         boolean exists = true;
         /*try {
@@ -237,7 +227,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setActualResidenceAddressDB(DatabaseConnection conn, String actualResidenceAddress) {
         this.actualResidenceAddress = actualResidenceAddress;
         try {
@@ -250,7 +239,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setHomeNumberDB(DatabaseConnection conn, String homeNumber) {
         this.homeNumber = homeNumber;
         try {
@@ -263,7 +251,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setMobileNumberDB(DatabaseConnection conn, String mobileNumber) {
         this.mobileNumber = mobileNumber;
         try {
@@ -276,7 +263,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setEmailDB(DatabaseConnection conn, String email) {
         this.email = email;
         try {
@@ -289,7 +275,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setJobDB(DatabaseConnection conn, String job) {
         this.job = job;
         try {
@@ -302,7 +287,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setPositionDB(DatabaseConnection conn, String position) {
         this.position = position;
         try {
@@ -315,7 +299,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setRegistrationCityDB(DatabaseConnection conn, String registrationCity) {
         boolean exists = true;
         /*try {
@@ -336,7 +319,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setMaritalStatusDB(DatabaseConnection conn, MaritalStatus maritalStatus) {
         this.maritalStatus = maritalStatus.toString();
         try {
@@ -350,7 +332,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setCitizenshipDB(DatabaseConnection conn, String citizenship) {
         boolean exists = true;
         /*try {
@@ -371,7 +352,6 @@ public class Client implements Serializable {
             }
         }
     }
-
     public void setDisabilityDB(DatabaseConnection conn, Disability disability) {
         this.disability = disability.toString();
         try {
@@ -385,7 +365,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setRetireeDB(DatabaseConnection conn, Retiree retiree) {
         this.retiree = retiree.toString();
         try {
@@ -398,7 +377,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setMonthlyIncomeDB(DatabaseConnection conn, String monthlyIncome) {
         this.monthlyIncome = monthlyIncome;
         try {
@@ -411,7 +389,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void setIdNumberDB(DatabaseConnection conn, String idNumber) {
         this.idNumber = idNumber;
         try {
@@ -425,7 +402,6 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
-
     public void deleteDB(DatabaseConnection conn) {
         try {
             String prepStat = "DELETE FROM clients WHERE Id = ?";
@@ -634,6 +610,83 @@ public class Client implements Serializable {
 
     public void setIdNumber(String idNumber) {
         this.idNumber = idNumber;
+    }
+
+    public void set(DatabaseConnection conn, String field, String value) {
+        switch (field) {
+            case "setName":
+                setNameDB(conn, value);
+                break;
+            case "setSurname":
+                setSurnameDB(conn, value);
+                break;
+            case "setPatronymic":
+                setPatronymicDB(conn, value);
+                break;
+            case "setBirthDate":
+                setBirthDateDB(conn, value);
+                break;
+            case "setPassportSeries":
+                setPassportSeriesDB(conn, value);
+                break;
+            case "setPassportNumber":
+                setPassportNumberDB(conn, value);
+                break;
+            case "setIssuedBy":
+                setIssuedByDB(conn, value);
+                break;
+            case "setIssuedDate":
+                setIssuedDateDB(conn, value);
+                break;
+            case "setBirthPlace":
+                setBirthPlaceDB(conn, value);
+                break;
+            case "setActualResidenceCity":
+                setActualResidenceCityDB(conn, value);
+                break;
+            case "setActualResidenceAddress":
+                setActualResidenceAddressDB(conn, value);
+                break;
+            case "setHomeNumber":
+                setHomeNumberDB(conn, value);
+                break;
+            case "setMobileNumber":
+                setMobileNumberDB(conn, value);
+                break;
+            case "setEmail":
+                setEmailDB(conn, value);
+                break;
+            case "setJob":
+                setJobDB(conn, value);
+                break;
+            case "setPosition":
+                setPositionDB(conn, value);
+                break;
+            case "setRegistrationCity":
+                setRegistrationCityDB(conn, value);
+                break;
+            case "setMaritalStatus":
+                setMaritalStatusDB(conn, MaritalStatus.valueOf(value));
+                break;
+            case "setCitizenship":
+                setCitizenshipDB(conn, value);
+                break;
+            case "setDisability":
+                setDisabilityDB(conn, Disability.valueOf(value));
+                break;
+            case "setRetiree":
+                setRetireeDB(conn, Retiree.valueOf(value));
+                break;
+            case "setMonthlyIncome":
+                setMonthlyIncomeDB(conn, value);
+                break;
+            case "setIdNumber":
+                setIdNumberDB(conn, value);
+                break;
+            case "delete":
+                deleteDB(conn);
+                break;
+        }
     }
 
     @Override

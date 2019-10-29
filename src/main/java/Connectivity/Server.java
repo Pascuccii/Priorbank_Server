@@ -58,7 +58,7 @@ public class Server implements TCPConnectionListener {
 
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
-        if(value.equals("init")) {
+        if (value.equals("init")) {
             tcpConnection.sendString(usersData.size() + " USERS:");
             for (User u : usersData)
                 tcpConnection.sendString(u.toString());
@@ -67,6 +67,14 @@ public class Server implements TCPConnectionListener {
             for (Client c : clientsData)
                 tcpConnection.sendString(c.toString());
             tcpConnection.sendString("END");
+        }
+        String[] vals = value.split("#");
+        if (vals[0].matches("Client")) {
+            for(Client c : clientsData)
+                if(c.getId() == Integer.parseInt(vals[2])) {
+                    c.set(conn, vals[1], vals[3]);
+                    break;
+                }
         }
     }
 
