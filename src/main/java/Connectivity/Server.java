@@ -57,6 +57,7 @@ public class Server implements TCPConnectionListener {
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
         System.out.println(value);
+        String[] vals;
         if (value.equals("init")) {
             try {
                 initUsersData();
@@ -73,7 +74,7 @@ public class Server implements TCPConnectionListener {
                 tcpConnection.sendString(c.toString());
             tcpConnection.sendString("END");
         }
-        String[] vals = value.split("#");
+        vals = value.split("\\|");
         if (vals[0].equals("Client")) {
             for (Client c : clientsData)
                 if (c.getId() == Integer.parseInt(vals[2])) {
@@ -92,9 +93,17 @@ public class Server implements TCPConnectionListener {
                     break;
                 }
         }
+        if (vals[0].equals("addUser")) {
+            System.out.println(value.substring(8));
+            addUser(value.substring(8));
+        }
         if (vals[0].equals("addClient")) {
             System.out.println(value.substring(10));
             addClient(value.substring(10));
+        }
+        if (vals[0].equals("changeAccountData")) {
+            System.out.println(value.substring(18));
+            changeAccountData(vals[1], vals[2], vals[3], vals[4]);
         }
     }
 
@@ -223,4 +232,32 @@ public class Server implements TCPConnectionListener {
         }
     }
 
+    private void addUser(String value) {
+        User u = new User(value);
+        try {
+            String prepStat = "INSERT INTO `test`.`users` (`name`, `password`, `email`,`access_mode`) VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStatement = connDB.getConnection().prepareStatement(prepStat);
+            preparedStatement.setString(1, u.getUsername());
+            preparedStatement.setString(2, u.getPassword());
+            preparedStatement.setString(3, u.getEmail());
+            preparedStatement.setInt(4, u.getAccessMode());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void changeAccountData(String id, String username, String password, String email) {
+        try {
+            String prepStat = "UPDATE `test`.`users` SET `name` = ?, `password` = ?, `email` = ? WHERE (`id` = ?);";
+            PreparedStatement preparedStatement = connDB.getConnection().prepareStatement(prepStat);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.setString(3, email);
+            preparedStatement.setInt(4, Integer.parseInt(id));
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

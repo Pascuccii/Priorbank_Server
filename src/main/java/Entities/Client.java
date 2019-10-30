@@ -43,8 +43,8 @@ public class Client implements Serializable {
 
     public Client(String client) {
         //0  1    2      3          4          5  6       7                          8          9     10    11                         12      13                  14                  15     16  17    18      19       20 21 22     23
-        //93#Глеб#Скачко#Дмитриевич#2000-08-09#MP#3418583#Первомайский РУВД г.Минска#2015-08-09#Минск#Минск#Самоцветная улица, дом 131#2943455#+375 (44) 543-53-90#skachko42@gmail.com#Google#CEO#Минск#Married#Беларусь#No#No#1300.0#4729553F119PB4
-        String[] vals = client.split("#");
+        //93|Глеб|Скачко|Дмитриевич|2000-08-09|MP|3418583|Первомайский РУВД г.Минска|2015-08-09|Минск|Минск|Самоцветная улица, дом 131|2943455|+375 (44) 543-53-90|skachko42@gmail.com|Google|CEO|Минск|Married|Беларусь|No|No|1300.0|4729553F119PB4
+        String[] vals = client.split("\\|");
         this.id = Integer.parseInt(vals[0]);
         if (!vals[1].equals("null")) this.name = vals[1];
         if (!vals[2].equals("null")) this.surname = vals[2];
@@ -745,28 +745,28 @@ public class Client implements Serializable {
     @Override
     public String toString() {
         return id +
-                "#" + name +
-                "#" + surname +
-                "#" + patronymic +
-                "#" + birthDate +
-                "#" + passportSeries +
-                "#" + passportNumber +
-                "#" + issuedBy +
-                "#" + issuedDate +
-                "#" + birthPlace +
-                "#" + actualResidenceCity +
-                "#" + actualResidenceAddress +
-                "#" + homeNumber +
-                "#" + mobileNumber +
-                "#" + email +
-                "#" + job +
-                "#" + position +
-                "#" + registrationCity +
-                "#" + maritalStatus +
-                "#" + citizenship +
-                "#" + disability +
-                "#" + retiree +
-                "#" + monthlyIncome +
-                "#" + idNumber;
+                "|" + name +
+                "|" + surname +
+                "|" + patronymic +
+                "|" + birthDate +
+                "|" + passportSeries +
+                "|" + passportNumber +
+                "|" + issuedBy +
+                "|" + issuedDate +
+                "|" + birthPlace +
+                "|" + actualResidenceCity +
+                "|" + actualResidenceAddress +
+                "|" + homeNumber +
+                "|" + mobileNumber +
+                "|" + email +
+                "|" + job +
+                "|" + position +
+                "|" + registrationCity +
+                "|" + maritalStatus +
+                "|" + citizenship +
+                "|" + disability +
+                "|" + retiree +
+                "|" + monthlyIncome +
+                "|" + idNumber;
     }
 }
