@@ -105,6 +105,9 @@ public class Server implements TCPConnectionListener {
             System.out.println(value.substring(18));
             changeAccountData(vals[1], vals[2], vals[3], vals[4]);
         }
+        if (vals[0].equals("deleteAllUsers")) {
+            deleteAllUsers();
+        }
     }
 
     @Override
@@ -241,6 +244,16 @@ public class Server implements TCPConnectionListener {
             preparedStatement.setString(2, u.getPassword());
             preparedStatement.setString(3, u.getEmail());
             preparedStatement.setInt(4, u.getAccessMode());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteAllUsers() {
+        try {
+            String prepStat = "DELETE FROM `test`.`users` WHERE (`id` > -1)";
+            PreparedStatement preparedStatement = connDB.getConnection().prepareStatement(prepStat);
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
