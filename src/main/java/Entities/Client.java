@@ -1,7 +1,6 @@
 package Entities;
 
 
-
 import Connectivity.DatabaseConnection;
 import enums.Disability;
 import enums.MaritalStatus;
@@ -42,6 +41,36 @@ public class Client implements Serializable {
     public Client() {
     }
 
+    public Client(String client) {
+        //0  1    2      3          4          5  6       7                          8          9     10    11                         12      13                  14                  15     16  17    18      19       20 21 22     23
+        //93#Глеб#Скачко#Дмитриевич#2000-08-09#MP#3418583#Первомайский РУВД г.Минска#2015-08-09#Минск#Минск#Самоцветная улица, дом 131#2943455#+375 (44) 543-53-90#skachko42@gmail.com#Google#CEO#Минск#Married#Беларусь#No#No#1300.0#4729553F119PB4
+        String[] vals = client.split("#");
+        this.id = Integer.parseInt(vals[0]);
+        if (!vals[1].equals("null")) this.name = vals[1];
+        if (!vals[2].equals("null")) this.surname = vals[2];
+        if (!vals[3].equals("null")) this.patronymic = vals[3];
+        if (!vals[4].equals("null")) this.birthDate = vals[4];
+        if (!vals[5].equals("null")) this.passportSeries = vals[5];
+        if (!vals[6].equals("null")) this.passportNumber = vals[6];
+        if (!vals[7].equals("null")) this.issuedBy = vals[7];
+        if (!vals[8].equals("null")) this.issuedDate = vals[8];
+        if (!vals[9].equals("null")) this.birthPlace = vals[9];
+        if (!vals[10].equals("null")) this.actualResidenceCity = vals[10];
+        if (!vals[11].equals("null")) this.actualResidenceAddress = vals[11];
+        if (!vals[12].equals("null")) this.homeNumber = vals[12];
+        if (!vals[13].equals("null")) this.mobileNumber = vals[13];
+        if (!vals[14].equals("null")) this.email = vals[14];
+        if (!vals[15].equals("null")) this.job = vals[15];
+        if (!vals[16].equals("null")) this.position = vals[16];
+        if (!vals[17].equals("null")) this.registrationCity = vals[17];
+        if (!vals[18].equals("null")) this.maritalStatus = vals[18];
+        if (!vals[19].equals("null")) this.citizenship = vals[19];
+        if (!vals[20].equals("null")) this.disability = vals[20];
+        if (!vals[21].equals("null")) this.retiree = vals[21];
+        if (!vals[22].equals("null")) this.monthlyIncome = vals[22];
+        if (!vals[23].equals("null")) this.idNumber = vals[23];
+    }
+
     public Client(int id, String name, String surname, String patronymic, String birthDate, String passportSeries, String passportNumber, String issuedBy, String issuedDate, String birthPlace, String actualResidenceCity, String actualResidenceAddress, String homeNumber, String mobileNumber, String email, String job, String position, String registrationCity, String maritalStatus, String citizenship, String disability, String retiree, String monthlyIncome, String idNumber) {
         this.id = id;
         this.name = name;
@@ -73,6 +102,7 @@ public class Client implements Serializable {
     public void setIdDB(DatabaseConnection conn, int id) {
         this.id = id;
     }
+
     public void setNameDB(DatabaseConnection conn, String name) {
         name = name.trim();
         if (name.matches("[а-яА-Я]{2,20}")) {
@@ -88,6 +118,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setSurnameDB(DatabaseConnection conn, String surname) {
         surname = surname.trim();
         if (surname.matches("[а-яА-Я]{2,20}")) {
@@ -103,6 +134,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setPatronymicDB(DatabaseConnection conn, String patronymic) {
         patronymic = patronymic.trim();
         if (patronymic.matches("[а-яА-Я]{2,30}")) {
@@ -118,6 +150,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setBirthDateDB(DatabaseConnection conn, String birthDate) {
         birthDate = birthDate.trim();
         if (birthDate.matches("^\\d{4}[-/](((0)[0-9])|((1)[0-2]))[-/]([0-2][0-9]|(3)[0-1])$")) {
@@ -133,6 +166,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setPassportSeriesDB(DatabaseConnection conn, String passportSeries) {
         this.passportSeries = passportSeries;
         try {
@@ -145,6 +179,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setPassportNumberDB(DatabaseConnection conn, String passportNumber) {
         passportNumber = passportNumber.trim();
         if (passportNumber.matches("^\\d{7}$")) {
@@ -160,6 +195,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setIssuedByDB(DatabaseConnection conn, String issuedBy) {
         this.issuedBy = issuedBy;
         try {
@@ -172,6 +208,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setIssuedDateDB(DatabaseConnection conn, String issuedDate) {
         issuedDate = issuedDate.trim();
         if (issuedDate.matches("^\\d{4}[-/](((0)[0-9])|((1)[0-2]))[-/]([0-2][0-9]|(3)[0-1])$")) {
@@ -187,6 +224,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setBirthPlaceDB(DatabaseConnection conn, String birthPlace) {
         boolean exists = true;
         /*try {
@@ -194,7 +232,7 @@ public class Client implements Serializable {
         } catch (IllegalArgumentException e) {
             exists = false;
         }*/
-        if(exists) {
+        if (exists) {
             this.birthPlace = birthPlace;
             try {
                 String prepStat = "UPDATE clients SET Birth_place = ? WHERE id = ?";
@@ -207,6 +245,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setActualResidenceCityDB(DatabaseConnection conn, String actualResidenceCity) {
         boolean exists = true;
         /*try {
@@ -214,7 +253,7 @@ public class Client implements Serializable {
         } catch (IllegalArgumentException e) {
             exists = false;
         }*/
-        if(exists) {
+        if (exists) {
             this.actualResidenceCity = actualResidenceCity;
             try {
                 String prepStat = "UPDATE clients SET Actual_residence_city = ? WHERE id = ?";
@@ -227,6 +266,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setActualResidenceAddressDB(DatabaseConnection conn, String actualResidenceAddress) {
         this.actualResidenceAddress = actualResidenceAddress;
         try {
@@ -239,6 +279,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setHomeNumberDB(DatabaseConnection conn, String homeNumber) {
         this.homeNumber = homeNumber;
         try {
@@ -251,6 +292,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setMobileNumberDB(DatabaseConnection conn, String mobileNumber) {
         this.mobileNumber = mobileNumber;
         try {
@@ -263,6 +305,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setEmailDB(DatabaseConnection conn, String email) {
         this.email = email;
         try {
@@ -275,6 +318,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setJobDB(DatabaseConnection conn, String job) {
         this.job = job;
         try {
@@ -287,6 +331,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setPositionDB(DatabaseConnection conn, String position) {
         this.position = position;
         try {
@@ -299,6 +344,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setRegistrationCityDB(DatabaseConnection conn, String registrationCity) {
         boolean exists = true;
         /*try {
@@ -306,7 +352,7 @@ public class Client implements Serializable {
         } catch (IllegalArgumentException e) {
             exists = false;
         }*/
-        if(exists) {
+        if (exists) {
             this.registrationCity = registrationCity;
             try {
                 String prepStat = "UPDATE clients SET Registration_city = ? WHERE id = ?";
@@ -319,6 +365,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setMaritalStatusDB(DatabaseConnection conn, MaritalStatus maritalStatus) {
         this.maritalStatus = maritalStatus.toString();
         try {
@@ -332,6 +379,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setCitizenshipDB(DatabaseConnection conn, String citizenship) {
         boolean exists = true;
         /*try {
@@ -339,7 +387,7 @@ public class Client implements Serializable {
         } catch (IllegalArgumentException e) {
             exists = false;
         }*/
-        if(exists) {
+        if (exists) {
             this.citizenship = citizenship;
             try {
                 String prepStat = "UPDATE clients SET Citizenship = ? WHERE id = ?";
@@ -352,6 +400,7 @@ public class Client implements Serializable {
             }
         }
     }
+
     public void setDisabilityDB(DatabaseConnection conn, Disability disability) {
         this.disability = disability.toString();
         try {
@@ -365,6 +414,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setRetireeDB(DatabaseConnection conn, Retiree retiree) {
         this.retiree = retiree.toString();
         try {
@@ -377,6 +427,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setMonthlyIncomeDB(DatabaseConnection conn, String monthlyIncome) {
         this.monthlyIncome = monthlyIncome;
         try {
@@ -389,6 +440,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void setIdNumberDB(DatabaseConnection conn, String idNumber) {
         this.idNumber = idNumber;
         try {
@@ -402,6 +454,7 @@ public class Client implements Serializable {
             e.printStackTrace();
         }
     }
+
     public void deleteDB(DatabaseConnection conn) {
         try {
             String prepStat = "DELETE FROM clients WHERE Id = ?";

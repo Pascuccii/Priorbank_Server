@@ -10,21 +10,19 @@ import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class Server implements TCPConnectionListener {
 
     private final ArrayList<TCPConnection> connections = new ArrayList<>();
-    private final DatabaseConnection conn;
+    private final DatabaseConnection connDB;
     private ObservableList<User> usersData = FXCollections.observableArrayList();
     private ObservableList<Client> clientsData = FXCollections.observableArrayList();
 
     private Server() {
         System.out.println("Server's running...");
-        conn =
+        connDB =
                 new DatabaseConnection("jdbc:mysql://localhost:3306/test?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true" +
                         "&useLegacyDatetimeCode=false&serverTimezone=Europe/Moscow", "root", "root");
         try {
@@ -58,7 +56,14 @@ public class Server implements TCPConnectionListener {
 
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
+        System.out.println(value);
         if (value.equals("init")) {
+            try {
+                initUsersData();
+                initClientsData();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             tcpConnection.sendString(usersData.size() + " USERS:");
             for (User u : usersData)
                 tcpConnection.sendString(u.toString());
@@ -69,12 +74,27 @@ public class Server implements TCPConnectionListener {
             tcpConnection.sendString("END");
         }
         String[] vals = value.split("#");
-        if (vals[0].matches("Client")) {
-            for(Client c : clientsData)
-                if(c.getId() == Integer.parseInt(vals[2])) {
-                    c.set(conn, vals[1], vals[3]);
+        if (vals[0].equals("Client")) {
+            for (Client c : clientsData)
+                if (c.getId() == Integer.parseInt(vals[2])) {
+                    c.set(connDB, vals[1], vals[3]);
                     break;
                 }
+        }
+        if (vals[0].equals("User")) {
+            for (User u : usersData)
+                if (u.getId() == Integer.parseInt(vals[2])) {
+                    try {
+                        u.set(connDB, vals[1], vals[3]);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+        }
+        if (vals[0].equals("addClient")) {
+            System.out.println(value.substring(10));
+            addClient(value.substring(10));
         }
     }
 
@@ -95,9 +115,9 @@ public class Server implements TCPConnectionListener {
     }
 
     private void initUsersData() throws SQLException {
-        if (conn.isConnected()) {
-            Statement statement = conn.getConnection().createStatement();
-            Statement statement2 = conn.getConnection().createStatement();
+        if (connDB.isConnected()) {
+            Statement statement = connDB.getConnection().createStatement();
+            Statement statement2 = connDB.getConnection().createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT  * FROM users");
             usersData.clear();
 
@@ -122,8 +142,8 @@ public class Server implements TCPConnectionListener {
     }
 
     private void initClientsData() throws SQLException {
-        if (conn.isConnected()) {
-            Statement statement = conn.getConnection().createStatement();
+        if (connDB.isConnected()) {
+            Statement statement = connDB.getConnection().createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM clients");
             clientsData.clear();
 
@@ -159,6 +179,48 @@ public class Server implements TCPConnectionListener {
             }
         }
 
+    }
+
+    private void addClient(String value) {
+        try {
+            Client toAdd = new Client(value);
+            System.out.println(toAdd);
+            String prepStat =
+                    "INSERT INTO `test`.`clients` (`Name`, `Surname`, `Patronymic`, `Birth_date`, `Passport_series`, `Passport_number`," +
+                            "                              `Issued_by`, `Issued_date`, `Birth_place`, `Actual_residence_city`," +
+                            "                              `Actual_residence_address`, `Home_number`, `Mobile_number`, `Email`, `Job`, `Position`," +
+                            "                              `Registration_city`, `Disability`, `Marital_status`, `Citizenship`, `Is_retiree`," +
+                            "                              `Monthly_income`, `Id_number`)" +
+                            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+            PreparedStatement preparedStatement = connDB.getConnection().prepareStatement(prepStat);
+            preparedStatement.setString(1, toAdd.getName());
+            preparedStatement.setString(2, toAdd.getSurname());
+            preparedStatement.setString(3, toAdd.getPatronymic());
+            preparedStatement.setDate(4, Date.valueOf(toAdd.getBirthDate()));
+            preparedStatement.setString(5, toAdd.getPassportSeries());
+            preparedStatement.setString(6, toAdd.getPassportNumber());
+            preparedStatement.setString(7, toAdd.getIssuedBy());
+            preparedStatement.setDate(8, Date.valueOf(toAdd.getIssuedDate()));
+            preparedStatement.setString(9, toAdd.getBirthPlace());
+            preparedStatement.setString(10, toAdd.getActualResidenceCity());
+            preparedStatement.setString(11, toAdd.getActualResidenceAddress());
+            preparedStatement.setString(12, toAdd.getHomeNumber());
+            preparedStatement.setString(13, toAdd.getMobileNumber());
+            preparedStatement.setString(14, toAdd.getEmail());
+            preparedStatement.setString(15, toAdd.getJob());
+            preparedStatement.setString(16, toAdd.getPosition());
+            preparedStatement.setString(17, toAdd.getRegistrationCity());
+            preparedStatement.setString(18, toAdd.getDisability());
+            System.out.println(toAdd.getMonthlyIncome());
+            preparedStatement.setString(19, toAdd.getMaritalStatus());
+            preparedStatement.setString(20, toAdd.getCitizenship());
+            preparedStatement.setString(21, toAdd.getRetiree());
+            preparedStatement.setString(22, toAdd.getMonthlyIncome());
+            preparedStatement.setString(23, toAdd.getIdNumber());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

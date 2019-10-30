@@ -165,6 +165,28 @@ public class User implements Serializable {
         preparedStatement.execute();
     }
 
+    public void set(DatabaseConnection conn, String field, String value) throws SQLException {
+        switch (field) {
+            case "setAccessMode":
+                setAccessModeDB(conn, Integer.parseInt(value));
+                break;
+            case "setUsername":
+                setUsernameDB(conn, value);
+                break;
+            case "setPassword":
+                setPasswordDB(conn, value);
+                break;
+            case "setEmail":
+                setEMailDB(conn, value);
+                break;
+            case "setTheme":
+                setThemeDB(conn, value);
+                break;
+            case "setLanguage":
+                setLanguageDB(conn, value);
+                break;
+        }
+    }
 
     public int getId() {
         return id;
