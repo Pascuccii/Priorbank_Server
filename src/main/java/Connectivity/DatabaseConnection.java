@@ -12,6 +12,9 @@ public class DatabaseConnection {
     public boolean isConnected() {
         return connected;
     }
+
+    public DatabaseConnection() { }
+
     public DatabaseConnection(String URL, String USER, String PASS) {
         try {
             connection = DriverManager.getConnection(URL, USER, PASS);

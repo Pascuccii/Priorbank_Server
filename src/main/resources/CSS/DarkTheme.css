@@ -235,7 +235,13 @@
 }
 
 .workPane {
-    -fx-background-color: transparent;
+    -fx-background-color: #282828;
+}
+
+.mainPane {
+    -fx-background-color: #383838;
+    -fx-border-color: #B8B8B8;
+    -fx-border-width: 1;
 }
 
 .loginPane {

@@ -13,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
@@ -795,7 +796,10 @@ public class Server extends Application implements TCPConnectionListener {
     @FXML
     private Label loginWarning;
 
-    private Server() {
+    @FXML
+    private AnchorPane mainPane;
+
+    public Server() {
         System.out.println("Server's running...");
         connDB =
                 new DatabaseConnection("jdbc:mysql://localhost:3306/test?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true" +
@@ -806,10 +810,18 @@ public class Server extends Application implements TCPConnectionListener {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    public void listen() {
+        System.out.println("listening");
         try (ServerSocket serverSocket = new ServerSocket(8189)) {
             while (true) {
                 try {
-                    new TCPConnection(this, serverSocket.accept());
+                    connections.add(new TCPConnection(this, serverSocket.accept()));
                 } catch (IOException e) {
                     System.out.println("TCPConnection exception: " + e);
                 }
@@ -817,11 +829,6 @@ public class Server extends Application implements TCPConnectionListener {
         } catch (IOException e) {
             throw new RuntimeException();
         }
-    }
-
-    public static void main(String[] args) {
-        new Server();
-        launch(args);
     }
 
     @Override
@@ -1060,6 +1067,7 @@ public class Server extends Application implements TCPConnectionListener {
         primaryStage.setTitle("Main");
         Scene scene = new Scene(root, 800, 500, Color.TRANSPARENT);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
+        primaryStage.getIcons().add(new Image("assets/server-icon.png"));
         root.setOnMousePressed(mouseEvent -> {
             xOffset = mouseEvent.getSceneX();
             yOffset = mouseEvent.getSceneY();
@@ -1071,6 +1079,10 @@ public class Server extends Application implements TCPConnectionListener {
         primaryStage.setMaximized(false);
         primaryStage.setScene(scene);
         primaryStage.show();
+        new Thread(()-> {
+            System.out.println("sss");
+            new Server().listen();
+        }).start();
     }
 
     @Override
@@ -1080,10 +1092,36 @@ public class Server extends Application implements TCPConnectionListener {
 
     @FXML
     void initialize() {
+        mainPane.getStyleClass().add("mainPane");
+        title.getStyleClass().add("title");
+        workPane.getStyleClass().add("workPane");
         primaryAnchorPane.getStylesheets().add("CSS/DarkTheme.css");
         primaryAnchorPane.setVisible(true);
-        loginPane.setVisible(true);
+        hideButton.getStyleClass().add("hideButton");
+        minimizeButton.getStyleClass().add("minimizeButton");
+        exitButton.getStyleClass().add("exitButton");
+        hideButton.setOnAction(actionEvent -> {
+            Stage stage2 = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
+            stage2.setIconified(true);
+        });
+        minimizeButton.setOnAction(actionEvent -> minimize());
+        exitButton.setOnAction(actionEvent -> {
+            Stage stage = (Stage) exitButton.getScene().getWindow();
+            stage.close();
+            System.exit(0);
+        });
     }
 
+    private void minimize() {
+        Stage stage = (Stage) minimizeButton.getScene().getWindow();
+        if (stage.isMaximized()) {
+            stage.setMaximized(false);
+            minimizeButton.setStyle("-fx-background-image: url(assets/expand-white.png)");
+
+        } else {
+            stage.setMaximized(true);
+            minimizeButton.setStyle("-fx-background-image: url(assets/minimize-white.png)");
+        }
+    }
     //TODO: make server jfx app
 }
