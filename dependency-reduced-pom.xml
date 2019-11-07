@@ -26,7 +26,7 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>sample.Controls.Launcher</mainClass>
+          <mainClass>Connectivity.Server</mainClass>
         </configuration>
       </plugin>
       <plugin>
@@ -41,7 +41,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>sample.Controls.Launcher</mainClass>
+                  <mainClass>Connectivity.Server</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -53,7 +53,7 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>8.8.3</version>
         <configuration>
-          <mainClass>sample.Controls.Launcher</mainClass>
+          <mainClass>Connectivity.Server</mainClass>
         </configuration>
       </plugin>
     </plugins>
