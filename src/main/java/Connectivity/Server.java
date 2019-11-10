@@ -6,6 +6,7 @@ import enums.Disability;
 import enums.MaritalStatus;
 import enums.Retiree;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,34 +15,28 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.ResourceBundle;
+
+import static java.lang.Thread.sleep;
 
 public class Server extends Application implements TCPConnectionListener {
 
+    private volatile static String log = "";
+    private volatile static String currentUserName;
     private final ArrayList<TCPConnection> connections = new ArrayList<>();
     private final DatabaseConnection connDB;
     private double xOffset = 0;
     private double yOffset = 0;
     private ObservableList<User> usersData = FXCollections.observableArrayList();
     private ObservableList<Client> clientsData = FXCollections.observableArrayList();
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private AnchorPane primaryAnchorPane;
@@ -62,742 +57,39 @@ public class Server extends Application implements TCPConnectionListener {
     private AnchorPane workPane;
 
     @FXML
-    private AnchorPane leftAnchorPane;
-
-    @FXML
-    private FlowPane menuAdmin;
-
-    @FXML
-    private Label currentUserLabelAdmin;
-
-    @FXML
-    private Button menuAdminButton1;
-
-    @FXML
-    private Button menuAdminButton2;
-
-    @FXML
-    private Button menuAdminButton3;
-
-    @FXML
-    private Button menuAdminButton4;
-
-    @FXML
-    private Button logoutButtonAdmin;
-
-    @FXML
-    private FlowPane menuUser;
-
-    @FXML
-    private Label currentUserLabelUser;
-
-    @FXML
-    private Button menuUserButton1;
-
-    @FXML
-    private Button menuUserButton2;
-
-    @FXML
-    private Button menuUserButton3;
-
-    @FXML
-    private Button menuUserButton4;
-
-    @FXML
-    private Button logoutButtonUser;
-
-    @FXML
-    private AnchorPane rightAnchorPane;
-
-    @FXML
-    private AnchorPane menuPane1;
-
-    @FXML
-    private TextField searchField;
-
-    @FXML
-    private TableView<?> usersTable;
-
-    @FXML
-    private TableColumn<?, ?> idColumn;
-
-    @FXML
-    private TableColumn<?, ?> accessModeColumn;
-
-    @FXML
-    private TableColumn<?, ?> usernameColumn;
-
-    @FXML
-    private TableColumn<?, ?> passwordColumn;
-
-    @FXML
-    private TableColumn<?, ?> emailColumn;
-
-    @FXML
-    private MenuButton criteriaButton;
-
-    @FXML
-    private MenuItem criteriaMenuItem_Id;
-
-    @FXML
-    private MenuItem criteriaMenuItem_Access;
-
-    @FXML
-    private MenuItem criteriaMenuItem_Username;
-
-    @FXML
-    private MenuItem criteriaMenuItem_Password;
-
-    @FXML
-    private MenuItem criteriaMenuItem_Email;
-
-    @FXML
-    private Button searchButton;
-
-    @FXML
-    private Button resetSearchButton;
-
-    @FXML
-    private ImageView fixImage;
-
-    @FXML
-    private AnchorPane createUser_AnchorPane;
-
-    @FXML
-    private TextField createUser_AnchorPane_Username;
-
-    @FXML
-    private TextField createUser_AnchorPane_Password;
-
-    @FXML
-    private TextField createUser_AnchorPane_Email;
-
-    @FXML
-    private Button createUserButton;
-
-    @FXML
-    private MenuButton createUser_AnchorPane_AccessMode_MenuButton;
-
-    @FXML
-    private MenuItem createUser_AccessMenuItem_User;
-
-    @FXML
-    private MenuItem createUser_AccessMenuItem_Admin;
-
-    @FXML
-    private AnchorPane changeUser_AnchorPane;
-
-    @FXML
-    private TextField changeUser_AnchorPane_Id;
-
-    @FXML
-    private TextField changeUser_AnchorPane_Username;
-
-    @FXML
-    private TextField changeUser_AnchorPane_Password;
-
-    @FXML
-    private TextField changeUser_AnchorPane_Email;
-
-    @FXML
-    private Button changeUser_AnchorPane_IdSubmitButton;
-
-    @FXML
-    private Button changeUserButton;
-
-    @FXML
-    private MenuButton changeUser_AnchorPane_AccessMode_MenuButton;
-
-    @FXML
-    private MenuItem changeUser_AccessMenuItem_User;
-
-    @FXML
-    private MenuItem changeUser_AccessMenuItem_Admin;
-
-    @FXML
-    private AnchorPane deleteUser_AnchorPane;
-
-    @FXML
-    private TextField deleteUserTextField;
-
-    @FXML
-    private Button deleteUserButton;
-
-    @FXML
-    private Label deleteUserLabel;
-
-    @FXML
-    private AnchorPane menuPane2;
-
-    @FXML
-    private ScrollPane clientManagementScrollPane;
-
-    @FXML
-    private AnchorPane clientManagementAnchorPane;
-
-    @FXML
-    private AnchorPane createClient_AnchorPane;
-
-    @FXML
-    private AnchorPane createClient_AnchorPane_NameJobResidencePane;
-
-    @FXML
-    private Label addClientNameLabel;
-
-    @FXML
-    private Label addClientSurnameLabel;
-
-    @FXML
-    private Label addClientPatronymicLabel;
-
-    @FXML
-    private Label addClientJobLabel;
-
-    @FXML
-    private Label addClientPositionLabel;
-
-    @FXML
-    private Label addClientRegistrationCityLabel;
-
-    @FXML
-    private Label addClientCityLabel;
-
-    @FXML
-    private Label addClientAddressLabel;
-
-    @FXML
-    private TextField addClientRegistrationCityTextField;
-
-    @FXML
-    private TextField addClientNameTextField;
-
-    @FXML
-    private TextField addClientPositionTextField;
-
-    @FXML
-    private TextField addClientPatronymicTextField;
-
-    @FXML
-    private TextField addClientJobTextField;
-
-    @FXML
-    private TextField addClientSurnameTextField;
-
-    @FXML
-    private TextField addClientCityTextField;
-
-    @FXML
-    private TextField addClientAddressTextField;
-
-    @FXML
-    private Label addClientNameDescription;
-
-    @FXML
-    private Label addClientSurnameDescription;
-
-    @FXML
-    private Label addClientPatronymicDescription;
-
-    @FXML
-    private Label addClientJobDescription;
-
-    @FXML
-    private Label addClientPositionDescription;
-
-    @FXML
-    private Label addClientRegistrationCityDescription;
-
-    @FXML
-    private Label addClientCityDescription;
-
-    @FXML
-    private Label addClientAddressDescription;
-
-    @FXML
-    private AnchorPane createClient_AnchorPane_PassportDataPane;
-
-    @FXML
-    private Label addClientBirthDateLabel;
-
-    @FXML
-    private Label addClientBirthPlaceLabel;
-
-    @FXML
-    private Label addClientPassportSeriesLabel;
-
-    @FXML
-    private Label addClientPassportNumberLabel;
-
-    @FXML
-    private Label addClientIssuedByLabel;
-
-    @FXML
-    private Label addClientIssuedDateLabel;
-
-    @FXML
-    private Label addClientCitizenshipLabel;
-
-    @FXML
-    private Label addClientIDNumberLabel;
-
-    @FXML
-    private DatePicker addClientIssuedDatePicker;
-
-    @FXML
-    private DatePicker addClientBirthDatePicker;
-
-    @FXML
-    private TextField addClientPassportSeriesTextField;
-
-    @FXML
-    private TextField addClientPassportNumberTextField;
-
-    @FXML
-    private TextField addClientBirthPlaceTextField;
-
-    @FXML
-    private TextField addClientCitizenshipTextField;
-
-    @FXML
-    private TextField addClientIssuedByTextField;
-
-    @FXML
-    private TextField addClientIDNumberTextField;
-
-    @FXML
-    private Label addClientPassportSeriesDescription;
-
-    @FXML
-    private Label addClientPassportNumberDescription;
-
-    @FXML
-    private Label addClientIssuedByDescription;
-
-    @FXML
-    private Label addClientIssuedDateDescription;
-
-    @FXML
-    private Label addClientBirthPlaceDescription;
-
-    @FXML
-    private Label addClientBirthDateDescription;
-
-    @FXML
-    private Label addClientCitizenshipDescription;
-
-    @FXML
-    private Label addClientIDNumberDescription;
-
-    @FXML
-    private AnchorPane createClient_AnchorPane_ContactsOtherPane;
-
-    @FXML
-    private MenuButton addClientMaritalStatusMenuButton;
-
-    @FXML
-    private MenuItem addClientMaritalStatusMenuItem_Single;
-
-    @FXML
-    private MenuItem addClientMaritalStatusMenuItem_Married;
-
-    @FXML
-    private MenuItem addClientMaritalStatusMenuItem_Divorced;
-
-    @FXML
-    private MenuButton addClientDisabilityMenuButton;
-
-    @FXML
-    private MenuItem addClientDisabilityMenuItem_FirstGroup;
-
-    @FXML
-    private MenuItem addClientDisabilityMenuItem_SecondGroup;
-
-    @FXML
-    private MenuItem addClientDisabilityMenuItem_ThirdGroup;
-
-    @FXML
-    private MenuItem addClientDisabilityMenuItem_No;
-
-    @FXML
-    private MenuButton addClientRetireeMenuButton;
-
-    @FXML
-    private MenuItem addClientRetireeMenuItem_Yes;
-
-    @FXML
-    private MenuItem addClientRetireeMenuItem_No;
-
-    @FXML
-    private Label addClientMaritalStatusLabel;
-
-    @FXML
-    private Label addClientDisabilityLabel;
-
-    @FXML
-    private Label addClientRetireeLabel;
-
-    @FXML
-    private Label addClientHomePhoneLabel;
-
-    @FXML
-    private Label addClientMonthlyIncomeLabel;
-
-    @FXML
-    private Label addClientMobilePhoneLabel;
-
-    @FXML
-    private Label addClientEmailLabel;
-
-    @FXML
-    private TextField addClientMobilePhoneTextField;
-
-    @FXML
-    private TextField addClientMonthlyIncomeTextField;
-
-    @FXML
-    private TextField addClientEmailTextField;
-
-    @FXML
-    private TextField addClientHomePhoneTextField;
-
-    @FXML
-    private Label addClientMaritalStatusDescription;
-
-    @FXML
-    private Label addClientDisabilityDescription;
-
-    @FXML
-    private Label addClientRetireeDescription;
-
-    @FXML
-    private Label addClientHomePhoneDescription;
-
-    @FXML
-    private Label addClientMonthlyIncomeDescription;
-
-    @FXML
-    private Label addClientMobilePhoneDescription;
-
-    @FXML
-    private Label addClientEmailDescription;
-
-    @FXML
-    private Label addClientLabel;
-
-    @FXML
-    private Button addClientButton;
-
-    @FXML
-    private TableView<?> clientsTable;
-
-    @FXML
-    private TableColumn<?, ?> idClientColumn;
-
-    @FXML
-    private TableColumn<?, ?> surnameColumn;
-
-    @FXML
-    private TableColumn<?, ?> nameColumn;
-
-    @FXML
-    private TableColumn<?, ?> patronymicColumn;
-
-    @FXML
-    private TableColumn<?, ?> birthDateColumn;
-
-    @FXML
-    private TableColumn<?, ?> passportSeriesColumn;
-
-    @FXML
-    private TableColumn<?, ?> passportNumberColumn;
-
-    @FXML
-    private TableColumn<?, ?> issuedByColumn;
-
-    @FXML
-    private TableColumn<?, ?> issuedDateColumn;
-
-    @FXML
-    private TableColumn<?, ?> birthPlaceColumn;
-
-    @FXML
-    private TableColumn<?, ?> actualResidenceCityColumn;
-
-    @FXML
-    private TableColumn<?, ?> actualResidenceAddressColumn;
-
-    @FXML
-    private TableColumn<?, ?> homeNumberColumn;
-
-    @FXML
-    private TableColumn<?, ?> mobileNumberColumn;
-
-    @FXML
-    private TableColumn<?, ?> emailClientColumn;
-
-    @FXML
-    private TableColumn<?, ?> jobColumn;
-
-    @FXML
-    private TableColumn<?, ?> positionColumn;
-
-    @FXML
-    private TableColumn<?, ?> registrationCityColumn;
-
-    @FXML
-    private TableColumn<?, ?> citizenshipColumn;
-
-    @FXML
-    private TableColumn<?, ?> monthlyIncomeColumn;
-
-    @FXML
-    private TableColumn<?, ?> idNumberColumn;
-
-    @FXML
-    private TextField searchFieldClient;
-
-    @FXML
-    private Button searchButtonClient;
-
-    @FXML
-    private Button resetSearchButtonClient;
-
-    @FXML
-    private MenuButton criteriaButtonClient;
-
-    @FXML
-    private Menu criteriaClientMenuFIO;
-
-    @FXML
-    private MenuItem criteriaClientName;
-
-    @FXML
-    private MenuItem criteriaClientSurname;
-
-    @FXML
-    private MenuItem criteriaClientPatronymic;
-
-    @FXML
-    private MenuItem criteriaClientFIO;
-
-    @FXML
-    private Menu criteriaClientMenuPassport;
-
-    @FXML
-    private MenuItem criteriaClientPassportSeries;
-
-    @FXML
-    private MenuItem criteriaClientPassportNumber;
-
-    @FXML
-    private MenuItem criteriaClientIssuedBy;
-
-    @FXML
-    private MenuItem criteriaClientIssuedDate;
-
-    @FXML
-    private MenuItem criteriaClientBirthDate;
-
-    @FXML
-    private MenuItem criteriaClientBirthPlace;
-
-    @FXML
-    private MenuItem criteriaClientIDNumber;
-
-    @FXML
-    private MenuItem criteriaClientCitizenship;
-
-    @FXML
-    private Menu criteriaClientMenuResidence;
-
-    @FXML
-    private MenuItem criteriaClientActCity;
-
-    @FXML
-    private MenuItem criteriaClientActAddress;
-
-    @FXML
-    private MenuItem criteriaClientRegCity;
-
-    @FXML
-    private Menu criteriaClientMenuJob;
-
-    @FXML
-    private MenuItem criteriaClientJob;
-
-    @FXML
-    private MenuItem criteriaClientPosition;
-
-    @FXML
-    private Menu criteriaClientMenuContacts;
-
-    @FXML
-    private MenuItem criteriaClientEmail;
-
-    @FXML
-    private MenuItem criteriaClientHomePhone;
-
-    @FXML
-    private MenuItem criteriaClientMobilePhone;
-
-    @FXML
-    private Menu criteriaClientMenuOther;
-
-    @FXML
-    private MenuItem criteriaClientDisability;
-
-    @FXML
-    private MenuItem criteriaClientRetiree;
-
-    @FXML
-    private MenuItem criteriaClientMonthlyIncome;
-
-    @FXML
-    private MenuItem criteriaClientMaritalStatus;
-
-    @FXML
-    private MenuItem criteriaClientID;
-
-    @FXML
-    private ImageView fixImage2;
-
-    @FXML
-    private AnchorPane menuPane3;
-
-    @FXML
-    private AnchorPane menuPane31;
-
-    @FXML
-    private MenuButton languageButton;
-
-    @FXML
-    private MenuItem languageItem_Russian;
-
-    @FXML
-    private MenuItem languageItem_English;
-
-    @FXML
-    private Label languageLabel;
-
-    @FXML
-    private Label themeLabel;
-
-    @FXML
-    private MenuButton themeButton;
-
-    @FXML
-    private MenuItem themeItem_Dark;
-
-    @FXML
-    private MenuItem themeItem_Light;
-
-    @FXML
-    private Label customizationLabel;
-
-    @FXML
-    private AnchorPane accountSettingsPane;
-
-    @FXML
-    private Label accountSettingsLabel;
-
-    @FXML
-    private TextField accountSettingsUsernameTextField;
-
-    @FXML
-    private PasswordField accountSettingsPasswordTextField;
-
-    @FXML
-    private TextField accountSettingsEmailTextField;
-
-    @FXML
-    private Label accountSettingsUsernameLabel;
-
-    @FXML
-    private Label accountSettingsPasswordLabel;
-
-    @FXML
-    private Label accountSettingsEmailLabel;
-
-    @FXML
-    private Button accountSettingsSaveButton;
-
-    @FXML
-    private Label settingsWarningLabel;
-
-    @FXML
-    private AnchorPane databaseSettingsPane;
-
-    @FXML
-    private Label databaseSettingsLabel;
-
-    @FXML
-    private TextField databaseSettingsURLTextField;
-
-    @FXML
-    private Label databaseSettingsURLLabel;
-
-    @FXML
-    private Label databaseSettingsUsernameLabel;
-
-    @FXML
-    private Label databaseSettingsPasswordLabel;
-
-    @FXML
-    private Button databaseSettingsConnectButton;
-
-    @FXML
-    private TextField databaseSettingsUsernameTextField;
-
-    @FXML
-    private PasswordField databaseSettingsPasswordTextField;
-
-    @FXML
-    private Label databaseSettingsConnectionStatusLabel;
-
-    @FXML
-    private ProgressIndicator databaseSettingsConnectionProgressIndicator;
-
-    @FXML
-    private Button connectionIndicator;
-
-    @FXML
-    private Label menuPane1_DBLabel;
-
-    @FXML
-    private Button serverConnectButton;
-
-    @FXML
-    private AnchorPane menuPane4;
-
-    @FXML
-    private AnchorPane loginPane;
-
-    @FXML
-    private AnchorPane loginElementsPane;
-
-    @FXML
-    private TextField usernameField;
-
-    @FXML
-    private Button loginButton;
-
-    @FXML
-    private Label loginUsernameLabel;
-
-    @FXML
-    private Label loginPasswordLabel;
-
-    @FXML
-    private Button signUpButton;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private Label loginWarning;
-
-    @FXML
     private AnchorPane mainPane;
+
+    @FXML
+    private TextArea textAreaLog = new TextArea();
+
+    @FXML
+    private MenuButton serverOnOffMenuButton;
+    @FXML
+    private MenuItem serverOnMenuItem;
+    @FXML
+    private MenuItem serverOffMenuItem;
+
+    @FXML
+    private Button languageButton;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button clearButton;
+
+    @FXML
+    private TableView<TCPConnection> clientsTable;
+    private Label emptyLabel;
+
+    @FXML
+    private TableColumn<TCPConnection, String> ipColumn;
+    @FXML
+    private TableColumn<TCPConnection, String> portColumn;
+    @FXML
+    private TableColumn<TCPConnection, String> userColumn;
+
+    @FXML
+    private Label serverLabel;
+    private String currentLanguage;
 
     public Server() {
         System.out.println("Server's running...");
@@ -814,6 +106,85 @@ public class Server extends Application implements TCPConnectionListener {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @FXML
+    void initialize() {
+        textAreaLog.getStyleClass().add("textAreaLog");
+        mainPane.getStyleClass().add("mainPane");
+        title.getStyleClass().add("title");
+        workPane.getStyleClass().add("workPane");
+        primaryAnchorPane.getStylesheets().add("CSS/DarkTheme.css");
+        primaryAnchorPane.setVisible(true);
+        hideButton.getStyleClass().add("hideButton");
+        minimizeButton.getStyleClass().add("minimizeButton");
+        exitButton.getStyleClass().add("exitButton");
+        hideButton.setOnAction(actionEvent -> {
+            Stage stage2 = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
+            stage2.setIconified(true);
+        });
+        minimizeButton.setOnAction(actionEvent -> minimize());
+        exitButton.setOnAction(actionEvent -> {
+            Stage stage = (Stage) exitButton.getScene().getWindow();
+            stage.close();
+            System.exit(0);
+        });
+        languageButton.setOnAction(event -> translate());
+        emptyLabel = new Label("No connections");
+        serverOnMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOnMenuItem.getText()));
+        serverOffMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOffMenuItem.getText()));
+        clientsTable.setPlaceholder(emptyLabel);
+        new Thread(() -> {
+            while (true) {
+                try {
+                    sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                updateLog();
+            }
+        }).start();
+        currentLanguage = "English";
+        translate();
+
+    }
+
+    public void translate() {
+        if (currentLanguage.equals("English")) {
+            currentLanguage = "Russian";
+            Platform.runLater(() -> {
+                saveButton.setText("Сохранить");
+                clearButton.setText("Отчистить");
+                serverLabel.setText("Сервер:");
+                userColumn.setText("Пользователь");
+                portColumn.setText("Порт");
+                emptyLabel.setText("Нет подключений");
+                serverOnMenuItem.setText("ВКЛ");
+                serverOffMenuItem.setText("ВЫКЛ");
+                if (serverOnOffMenuButton.getText().equals("ON"))
+                    serverOnOffMenuButton.setText("ВКЛ");
+                else
+                    serverOnOffMenuButton.setText("ВЫКЛ");
+            });
+
+        } else {
+            currentLanguage = "English";
+            Platform.runLater(() -> {
+                saveButton.setText("Save log");
+                clearButton.setText("Clear log");
+                serverLabel.setText("Server:");
+                userColumn.setText("Current user");
+                portColumn.setText("Port");
+                emptyLabel.setText("No connections");
+                serverOnMenuItem.setText("ON");
+                serverOffMenuItem.setText("OFF");
+                if (serverOnOffMenuButton.getText().equals("ВКЛ"))
+                    serverOnOffMenuButton.setText("ON");
+                else
+                    serverOnOffMenuButton.setText("OFF");
+            });
+        }
+        clientsTable.refresh();
     }
 
     public void listen() {
@@ -834,12 +205,14 @@ public class Server extends Application implements TCPConnectionListener {
     @Override
     public synchronized void onConnectionReady(TCPConnection tcpConnection) {
         connections.add(tcpConnection);
-        sendToAllConnections("Client connected: " + tcpConnection);
+        Platform.runLater(() -> {
+            log += tcpConnection + " CONNECTED\n";
+            System.out.println(log);
+        });
     }
 
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
-        System.out.println(value);
         if (value.equals("init")) {
             try {
                 initUsersData();
@@ -855,60 +228,84 @@ public class Server extends Application implements TCPConnectionListener {
             for (Client c : clientsData)
                 tcpConnection.sendString(c.toString());
             tcpConnection.sendString("END");
-        }
-        String[] vals = value.split("\\|");
-        switch (vals[0]) {
-            case "Client":
-                for (Client c : clientsData)
-                    if (c.getId() == Integer.parseInt(vals[2])) {
-                        c.set(connDB, vals[1], vals[3]);
-                        break;
-                    }
-                break;
-            case "User":
-                for (User u : usersData)
-                    if (u.getId() == Integer.parseInt(vals[2])) {
-                        try {
-                            u.set(connDB, vals[1], vals[3]);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
+        } else {
+            String[] vals = value.split("\\|");
+            switch (vals[0]) {
+                case "Client":
+
+                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+
+                    for (Client c : clientsData)
+                        if (c.getId() == Integer.parseInt(vals[2])) {
+                            c.set(connDB, vals[1], vals[3]);
+                            break;
                         }
-                        break;
-                    }
-                break;
-            case "addUser":
-                System.out.println(value.substring(8));
-                addUser(value.substring(8));
-                break;
-            case "addClient":
-                System.out.println(value.substring(10));
-                addClient(value.substring(10));
-                break;
-            case "changeAccountData":
-                System.out.println(value.substring(18));
-                changeAccountData(vals[1], vals[2], vals[3], vals[4]);
-                break;
-            case "deleteAllUsers":
-                deleteAllUsers();
-                break;
-            default:
+                    break;
+                case "User":
+
+                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+
+                    for (User u : usersData)
+                        if (u.getId() == Integer.parseInt(vals[2])) {
+                            try {
+                                u.set(connDB, vals[1], vals[3]);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        }
+                    break;
+                case "addUser":
+                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+
+                    System.out.println(value.substring(8));
+                    addUser(value.substring(8));
+                    break;
+                case "addClient":
+                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+                    System.out.println(value.substring(10));
+                    addClient(value.substring(10));
+                    break;
+                case "changeAccountData":
+                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+
+                    System.out.println(value.substring(18));
+                    changeAccountData(vals[1], vals[2], vals[3], vals[4]);
+                    break;
+                case "deleteAllUsers":
+                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+
+                    deleteAllUsers();
+                    break;
+                case "setCurrentUser":
+                    System.out.println(value.substring(15));
+                    if (vals[1].equals("null"))
+                        log += "  " + tcpConnection + " \'" + tcpConnection.getUsername() + "\' logged out\n";
+                    else
+                        log += "  " + tcpConnection + " \'" + vals[1] + "\' logged in\n";
+                    tcpConnection.setUsername(vals[1]);
+
+
+                    break;
+                default:
+                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+
+            }
         }
     }
 
     @Override
     public synchronized void onDisconnect(TCPConnection tcpConnection) {
+        Platform.runLater(() -> {
+            log += tcpConnection + " DISCONNECTED\n";
+            System.out.println(log);
+        });
         connections.remove(tcpConnection);
-        sendToAllConnections("Client disconnected: " + tcpConnection);
     }
 
     @Override
     public synchronized void onException(TCPConnection tcpConnection, Exception e) {
         System.out.println("TCPConnection exception: " + e);
-    }
-
-    private void sendToAllConnections(String value) {
-        System.out.println(value);
-        for (TCPConnection c : connections) c.sendString(value);
     }
 
     private void initUsersData() throws SQLException {
@@ -1079,8 +476,7 @@ public class Server extends Application implements TCPConnectionListener {
         primaryStage.setMaximized(false);
         primaryStage.setScene(scene);
         primaryStage.show();
-        new Thread(()-> {
-            System.out.println("sss");
+        new Thread(() -> {
             new Server().listen();
         }).start();
     }
@@ -1090,26 +486,9 @@ public class Server extends Application implements TCPConnectionListener {
         super.stop();
     }
 
-    @FXML
-    void initialize() {
-        mainPane.getStyleClass().add("mainPane");
-        title.getStyleClass().add("title");
-        workPane.getStyleClass().add("workPane");
-        primaryAnchorPane.getStylesheets().add("CSS/DarkTheme.css");
-        primaryAnchorPane.setVisible(true);
-        hideButton.getStyleClass().add("hideButton");
-        minimizeButton.getStyleClass().add("minimizeButton");
-        exitButton.getStyleClass().add("exitButton");
-        hideButton.setOnAction(actionEvent -> {
-            Stage stage2 = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
-            stage2.setIconified(true);
-        });
-        minimizeButton.setOnAction(actionEvent -> minimize());
-        exitButton.setOnAction(actionEvent -> {
-            Stage stage = (Stage) exitButton.getScene().getWindow();
-            stage.close();
-            System.exit(0);
-        });
+    public void updateLog() {
+        if (!textAreaLog.getText().equals(log))
+            textAreaLog.setText(log);
     }
 
     private void minimize() {
@@ -1123,5 +502,5 @@ public class Server extends Application implements TCPConnectionListener {
             minimizeButton.setStyle("-fx-background-image: url(assets/minimize-white.png)");
         }
     }
-    //TODO: make server jfx app
+    //TODO: currentUser
 }

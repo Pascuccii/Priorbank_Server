@@ -1,8 +1,6 @@
 package Connectivity;
 
 
-import Entities.User;
-
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +11,7 @@ public class TCPConnection {
     private final TCPConnectionListener eventListener;
     private final BufferedReader in;
     private final BufferedWriter out;
-
+    private String username;
 
     public TCPConnection(TCPConnectionListener eventListener, String IP, int port) throws IOException {
         this(eventListener, new Socket(IP, port));
@@ -40,6 +38,14 @@ public class TCPConnection {
             }
         });
         rxThread.start();
+    }
+
+    public String getUsername() {
+        return (username == null) ? "" : username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public synchronized void sendString(String value) {
@@ -72,7 +78,6 @@ public class TCPConnection {
         return null;
     }
 
-
     public synchronized void disconnect() {
         rxThread.interrupt();
         try {
@@ -84,6 +89,6 @@ public class TCPConnection {
 
     @Override
     public String toString() {
-        return "Connectivity.TCPConnection: " + socket.getInetAddress() + ": " + socket.getPort();
+        return socket.getInetAddress() + "[" + socket.getPort() + "]";
     }
 }
