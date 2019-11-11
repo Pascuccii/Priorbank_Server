@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -23,15 +24,16 @@ import javafx.stage.StageStyle;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.sql.*;
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.Month;
+import java.time.ZonedDateTime;
 
 import static java.lang.Thread.sleep;
 
 public class Server extends Application implements TCPConnectionListener {
 
     private volatile static String log = "";
-    private volatile static String currentUserName;
-    private final ArrayList<TCPConnection> connections = new ArrayList<>();
+    private volatile static ObservableList<TCPConnection> connections = FXCollections.observableArrayList();
     private final DatabaseConnection connDB;
     private double xOffset = 0;
     private double yOffset = 0;
@@ -77,7 +79,7 @@ public class Server extends Application implements TCPConnectionListener {
     private Button clearButton;
 
     @FXML
-    private TableView<TCPConnection> clientsTable;
+    private TableView<TCPConnection> connectionsTable;
     private Label emptyLabel;
 
     @FXML
@@ -110,6 +112,9 @@ public class Server extends Application implements TCPConnectionListener {
 
     @FXML
     void initialize() {
+        ipColumn.setCellValueFactory(new PropertyValueFactory<>("ip"));
+        portColumn.setCellValueFactory(new PropertyValueFactory<>("port"));
+        userColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
         textAreaLog.getStyleClass().add("textAreaLog");
         mainPane.getStyleClass().add("mainPane");
         title.getStyleClass().add("title");
@@ -133,7 +138,8 @@ public class Server extends Application implements TCPConnectionListener {
         emptyLabel = new Label("No connections");
         serverOnMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOnMenuItem.getText()));
         serverOffMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOffMenuItem.getText()));
-        clientsTable.setPlaceholder(emptyLabel);
+        connectionsTable.setPlaceholder(emptyLabel);
+        connectionsTable.setItems(connections);
         new Thread(() -> {
             while (true) {
                 try {
@@ -146,7 +152,6 @@ public class Server extends Application implements TCPConnectionListener {
         }).start();
         currentLanguage = "English";
         translate();
-
     }
 
     public void translate() {
@@ -184,7 +189,7 @@ public class Server extends Application implements TCPConnectionListener {
                     serverOnOffMenuButton.setText("OFF");
             });
         }
-        clientsTable.refresh();
+        connectionsTable.refresh();
     }
 
     public void listen() {
@@ -204,15 +209,31 @@ public class Server extends Application implements TCPConnectionListener {
 
     @Override
     public synchronized void onConnectionReady(TCPConnection tcpConnection) {
-        connections.add(tcpConnection);
         Platform.runLater(() -> {
-            log += tcpConnection + " CONNECTED\n";
+            ZonedDateTime zdt = ZonedDateTime.now();
+            String year = String.valueOf(zdt.getYear());
+            String month = String.valueOf(zdt.getMonthValue());
+            String day = String.valueOf(zdt.getDayOfMonth());
+            String hour = String.valueOf(zdt.getHour());
+            String minute = String.valueOf(zdt.getMinute());
+            String second = String.valueOf(zdt.getSecond());
+
+            log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " CONNECTED\n";
             System.out.println(log);
         });
     }
 
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
+        ZonedDateTime zdt = ZonedDateTime.now();
+        String year = String.valueOf(zdt.getYear());
+        String month = String.valueOf(zdt.getMonthValue());
+        String day = String.valueOf(zdt.getDayOfMonth());
+        String hour = String.valueOf(zdt.getHour());
+        String minute = String.valueOf(zdt.getMinute());
+        String second = String.valueOf(zdt.getSecond());
+
+        System.out.println(value);
         if (value.equals("init")) {
             try {
                 initUsersData();
@@ -233,8 +254,7 @@ public class Server extends Application implements TCPConnectionListener {
             switch (vals[0]) {
                 case "Client":
 
-                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
-
+                    log(tcpConnection, value);
                     for (Client c : clientsData)
                         if (c.getId() == Integer.parseInt(vals[2])) {
                             c.set(connDB, vals[1], vals[3]);
@@ -243,8 +263,7 @@ public class Server extends Application implements TCPConnectionListener {
                     break;
                 case "User":
 
-                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
-
+                    log(tcpConnection, value);
                     for (User u : usersData)
                         if (u.getId() == Integer.parseInt(vals[2])) {
                             try {
@@ -256,48 +275,51 @@ public class Server extends Application implements TCPConnectionListener {
                         }
                     break;
                 case "addUser":
-                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
-
+                    log(tcpConnection, value);
                     System.out.println(value.substring(8));
                     addUser(value.substring(8));
                     break;
                 case "addClient":
-                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
+                    log(tcpConnection, value);
                     System.out.println(value.substring(10));
                     addClient(value.substring(10));
                     break;
                 case "changeAccountData":
-                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
-
+                    log(tcpConnection, value);
                     System.out.println(value.substring(18));
                     changeAccountData(vals[1], vals[2], vals[3], vals[4]);
                     break;
                 case "deleteAllUsers":
-                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
-
+                    log(tcpConnection, value);
                     deleteAllUsers();
                     break;
                 case "setCurrentUser":
                     System.out.println(value.substring(15));
                     if (vals[1].equals("null"))
-                        log += "  " + tcpConnection + " \'" + tcpConnection.getUsername() + "\' logged out\n";
+                        log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " \'" + tcpConnection.getUsername() + "\' logged out\n";
                     else
-                        log += "  " + tcpConnection + " \'" + vals[1] + "\' logged in\n";
+                        log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " \'" + vals[1] + "\' logged in\n";
                     tcpConnection.setUsername(vals[1]);
 
 
                     break;
                 default:
-                    log += "    " + tcpConnection + " " + tcpConnection.getUsername() + ": " + value + "\n";
-
+                    log(tcpConnection, value);
             }
         }
     }
 
     @Override
     public synchronized void onDisconnect(TCPConnection tcpConnection) {
+        ZonedDateTime zdt = ZonedDateTime.now();
+        String year = String.valueOf(zdt.getYear());
+        String month = String.valueOf(zdt.getMonthValue());
+        String day = String.valueOf(zdt.getDayOfMonth());
+        String hour = String.valueOf(zdt.getHour());
+        String minute = String.valueOf(zdt.getMinute());
+        String second = String.valueOf(zdt.getSecond());
         Platform.runLater(() -> {
-            log += tcpConnection + " DISCONNECTED\n";
+            log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " DISCONNECTED\n";
             System.out.println(log);
         });
         connections.remove(tcpConnection);
@@ -445,6 +467,8 @@ public class Server extends Application implements TCPConnectionListener {
 
     private void changeAccountData(String id, String username, String password, String email) {
         try {
+            if(email.equals("null"))
+                email = null;
             String prepStat = "UPDATE `test`.`users` SET `name` = ?, `password` = ?, `email` = ? WHERE (`id` = ?);";
             PreparedStatement preparedStatement = connDB.getConnection().prepareStatement(prepStat);
             preparedStatement.setString(1, username);
@@ -487,8 +511,23 @@ public class Server extends Application implements TCPConnectionListener {
     }
 
     public void updateLog() {
-        if (!textAreaLog.getText().equals(log))
+        connectionsTable.refresh();
+        if (!textAreaLog.getText().equals(log)) {
             textAreaLog.setText(log);
+            textAreaLog.setScrollTop(Double.MAX_VALUE);
+        }
+    }
+
+    public void log(TCPConnection tcp, String value) {
+        ZonedDateTime zdt = ZonedDateTime.now();
+        String year = String.valueOf(zdt.getYear());
+        String month = String.valueOf(zdt.getMonthValue());
+        String day = String.valueOf(zdt.getDayOfMonth());
+        String hour = String.valueOf(zdt.getHour());
+        String minute = String.valueOf(zdt.getMinute());
+        String second = String.valueOf(zdt.getSecond());
+
+        log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcp + " " + tcp.getUsername() + ": " + value + "\n";
     }
 
     private void minimize() {

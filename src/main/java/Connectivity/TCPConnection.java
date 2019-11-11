@@ -7,19 +7,20 @@ import java.nio.charset.StandardCharsets;
 
 public class TCPConnection {
     private final Socket socket;
+    private final String ip;
+    private final String port;
     private final Thread rxThread;
     private final TCPConnectionListener eventListener;
     private final BufferedReader in;
     private final BufferedWriter out;
     private String username;
 
-    public TCPConnection(TCPConnectionListener eventListener, String IP, int port) throws IOException {
-        this(eventListener, new Socket(IP, port));
-    }
-
     public TCPConnection(TCPConnectionListener eventListener, Socket socket) throws IOException {
         this.eventListener = eventListener;
         this.socket = socket;
+        this.ip = String.valueOf(socket.getInetAddress());
+        this.port = String.valueOf(socket.getPort());
+        this.username = "";
         in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
         rxThread = new Thread(new Runnable() {
@@ -45,7 +46,7 @@ public class TCPConnection {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.username = username.equals("null") ? "" : username;
     }
 
     public synchronized void sendString(String value) {
@@ -85,6 +86,14 @@ public class TCPConnection {
         } catch (IOException e) {
             eventListener.onException(TCPConnection.this, e);
         }
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public String getPort() {
+        return port;
     }
 
     @Override
