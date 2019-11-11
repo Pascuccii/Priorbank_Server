@@ -203,7 +203,8 @@ public class Server extends Application implements TCPConnectionListener {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException();
+            System.out.println("Another instance of server is working!!!");
+            System.exit(0);
         }
     }
 

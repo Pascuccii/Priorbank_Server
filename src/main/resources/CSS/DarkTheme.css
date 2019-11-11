@@ -256,6 +256,10 @@
     -fx-vbar-policy: ALWAYS;
 }
 
+.table-view {
+    -fx-hbar-policy: NEVER;
+}
+
 .text-area .content{
     -fx-font-family: Monospaced;
     -fx-text-fill: #D8D8D8;
