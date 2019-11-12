@@ -18,8 +18,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,10 +34,11 @@ import static java.lang.Thread.sleep;
 
 public class Server extends Application implements TCPConnectionListener {
 
-    private volatile boolean freezed = false;
+    private volatile static int serverState = 1;
     private volatile static String log = "";
     private volatile static ObservableList<TCPConnection> connections = FXCollections.observableArrayList();
     private final DatabaseConnection connDB;
+    private volatile static ServerSocket serverSocket;
     private double xOffset = 0;
     private double yOffset = 0;
     private ObservableList<User> usersData = FXCollections.observableArrayList();
@@ -71,6 +74,8 @@ public class Server extends Application implements TCPConnectionListener {
     private MenuItem serverOnMenuItem;
     @FXML
     private MenuItem serverOffMenuItem;
+    @FXML
+    private MenuItem serverStopMenuItem;
 
     @FXML
     private Button languageButton;
@@ -91,19 +96,27 @@ public class Server extends Application implements TCPConnectionListener {
     private TableColumn<TCPConnection, String> userColumn;
 
     @FXML
+    private Tooltip serverToolTip;
+
+    @FXML
     private Label serverLabel;
     private String currentLanguage;
 
     public Server() {
         System.out.println("Server's running...");
-        connDB =
-                new DatabaseConnection("jdbc:mysql://localhost:3306/test?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true" +
+        connDB = new DatabaseConnection("jdbc:mysql://localhost:3306/test?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true" +
                         "&useLegacyDatetimeCode=false&serverTimezone=Europe/Moscow", "root", "root");
+
         try {
+            if(serverSocket==null) {
+                serverSocket = new ServerSocket(8189);
+                serverSocket.setSoTimeout(1000);
+            }
             initUsersData();
             initClientsData();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (IOException | SQLException e) {
+            System.out.println("Another instance of server is running!!!");
+            System.exit(0);
         }
     }
 
@@ -113,8 +126,13 @@ public class Server extends Application implements TCPConnectionListener {
 
     @FXML
     void initialize() {
-        Tooltip tooltip = new Tooltip("This is a tooltip");
-        Tooltip.install(serverOnOffMenuButton, tooltip);
+        serverToolTip.setShowDelay(Duration.seconds(0));
+        serverToolTip.setShowDuration(Duration.INDEFINITE);
+        serverToolTip.setHideOnEscape(true);
+        serverToolTip.setFont(Font.font("Monospaced", 13));
+        serverToolTip.setText("ON - server is working and accepting new connections \n" +
+                "STOP - server is working and does not accept new connections\n" +
+                "OFF - server is not working");
         ipColumn.setCellValueFactory(new PropertyValueFactory<>("ip"));
         portColumn.setCellValueFactory(new PropertyValueFactory<>("port"));
         userColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
@@ -138,14 +156,60 @@ public class Server extends Application implements TCPConnectionListener {
             System.exit(0);
         });
         languageButton.setOnAction(event -> translate());
+        languageButton.getStyleClass().add("languageButton");
         saveButton.setOnAction(event -> saveLog());
         clearButton.setOnAction(event -> {
             textAreaLog.setText("");
             log = "";
         });
         emptyLabel = new Label("No connections");
-        serverOnMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOnMenuItem.getText()));
-        serverOffMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOffMenuItem.getText()));
+        serverOnMenuItem.setOnAction(event -> {
+            if(serverState != 1) {
+                serverOnOffMenuButton.setText(serverOnMenuItem.getText());
+                serverState = 1;
+                try {
+                    serverSocket = new ServerSocket(8189);
+                    serverSocket.setSoTimeout(1000);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                new Thread(this::listen).start();
+            }
+        });
+        serverStopMenuItem.setOnAction(event -> {
+            if(serverState != 0) {
+                serverOnOffMenuButton.setText(serverStopMenuItem.getText());
+                serverState = 0;
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        serverOffMenuItem.setOnAction(event -> {
+            if(serverState != -1) {
+                serverOnOffMenuButton.setText(serverOffMenuItem.getText());
+                Platform.runLater(() -> {
+
+                    for (int i = 0; i < connections.size();) {
+                        connections.get(i).disconnect();
+                    }
+
+                    System.out.println("SIZE = " + connections.size());
+
+                    for(TCPConnection c : connections)
+                        System.out.println(c);
+
+                });
+                serverState = -1;
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         connectionsTable.setPlaceholder(emptyLabel);
         connectionsTable.setItems(connections);
         new Thread(() -> {
@@ -159,21 +223,25 @@ public class Server extends Application implements TCPConnectionListener {
             }
         }).start();
         currentLanguage = "English";
-        translate();
     }
 
     public void translate() {
         if (currentLanguage.equals("English")) {
             currentLanguage = "Russian";
             Platform.runLater(() -> {
+                languageButton.setStyle("-fx-background-image: url(assets/russian.png)");
                 saveButton.setText("Сохранить");
                 clearButton.setText("Отчистить");
                 serverLabel.setText("Сервер:");
                 userColumn.setText("Пользователь");
                 portColumn.setText("Порт");
                 emptyLabel.setText("Нет подключений");
+                serverToolTip.setText("ВКЛ - сервер работает и принимает новые подключения\n" +
+                        "СТОП - сервер работает и не принимает новые подключения\n" +
+                        "ВЫКЛ - сервер не работает");
                 serverOnMenuItem.setText("ВКЛ");
                 serverOffMenuItem.setText("ВЫКЛ");
+                serverStopMenuItem.setText("СТОП");
                 if (serverOnOffMenuButton.getText().equals("ON"))
                     serverOnOffMenuButton.setText("ВКЛ");
                 else
@@ -183,14 +251,20 @@ public class Server extends Application implements TCPConnectionListener {
         } else {
             currentLanguage = "English";
             Platform.runLater(() -> {
+                languageButton.setStyle("-fx-background-image: url(assets/english.png)");
                 saveButton.setText("Save log");
                 clearButton.setText("Clear log");
                 serverLabel.setText("Server:");
                 userColumn.setText("Current user");
                 portColumn.setText("Port");
                 emptyLabel.setText("No connections");
+
+                serverToolTip.setText("ON - server is working and accepting new connections \n" +
+                        "STOP - server is working and does not accept new connections\n" +
+                        "OFF - server is not working");
                 serverOnMenuItem.setText("ON");
                 serverOffMenuItem.setText("OFF");
+                serverStopMenuItem.setText("STOP");
                 if (serverOnOffMenuButton.getText().equals("ВКЛ"))
                     serverOnOffMenuButton.setText("ON");
                 else
@@ -202,17 +276,18 @@ public class Server extends Application implements TCPConnectionListener {
 
     public void listen() {
         System.out.println("listening");
-        try (ServerSocket serverSocket = new ServerSocket(8189)) {
-            while (!freezed) {
-                try {
-                    connections.add(new TCPConnection(this, serverSocket.accept()));
-                } catch (IOException e) {
-                    System.out.println("TCPConnection exception: " + e);
+        while (serverState == 1) {
+            try {
+                TCPConnection newConn = new TCPConnection(this, serverSocket.accept());
+                if (serverState == 1)
+                    connections.add(newConn);
+                else {
+                    newConn.disconnect();
+                    log += getCurrentDateTime() + newConn + " REJECTED (STOP mode)\n";
                 }
+            } catch (IOException e) {
+                System.out.println("TCPConnection exception: " + e);
             }
-        } catch (IOException e) {
-            System.out.println("Another instance of server is working!!!");
-            System.exit(0);
         }
     }
 
@@ -225,7 +300,7 @@ public class Server extends Application implements TCPConnectionListener {
             String hour = String.valueOf(zdt.getHour());
             String minute = String.valueOf(zdt.getMinute());
             String second = String.valueOf(zdt.getSecond());
-            String path = "log-" + year  + month  + day + "(" + hour + "h" + minute + "m" + second + "s).txt";
+            String path = "log-" + year + month + day + "(" + hour + "h" + minute + "m" + second + "s).txt";
             File savedLog = new File(path);
             FileWriter lastConfigWriter = new FileWriter(savedLog, false);
             if (!savedLog.exists())
@@ -244,85 +319,86 @@ public class Server extends Application implements TCPConnectionListener {
     public synchronized void onConnectionReady(TCPConnection tcpConnection) {
         Platform.runLater(() -> {
             log += getCurrentDateTime() + " " + tcpConnection + " CONNECTED\n";
-            System.out.println(log);
         });
     }
 
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
+        if(value != null) {
+            System.out.println(value);
+            if (value.equals("init")) {
+                try {
+                    initUsersData();
+                    initClientsData();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                tcpConnection.sendString(usersData.size() + " USERS:");
+                for (User u : usersData)
+                    tcpConnection.sendString(u.toString());
 
-        System.out.println(value);
-        if (value.equals("init")) {
-            try {
-                initUsersData();
-                initClientsData();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            tcpConnection.sendString(usersData.size() + " USERS:");
-            for (User u : usersData)
-                tcpConnection.sendString(u.toString());
+                tcpConnection.sendString(clientsData.size() + " CLIENTS:");
+                for (Client c : clientsData)
+                    tcpConnection.sendString(c.toString());
+                tcpConnection.sendString("END");
+            } else {
+                String[] vals = value.split("\\|");
+                switch (vals[0]) {
+                    case "Client":
 
-            tcpConnection.sendString(clientsData.size() + " CLIENTS:");
-            for (Client c : clientsData)
-                tcpConnection.sendString(c.toString());
-            tcpConnection.sendString("END");
-        } else {
-            String[] vals = value.split("\\|");
-            switch (vals[0]) {
-                case "Client":
-
-                    log(tcpConnection, value);
-                    for (Client c : clientsData)
-                        if (c.getId() == Integer.parseInt(vals[2])) {
-                            c.set(connDB, vals[1], vals[3]);
-                            break;
-                        }
-                    break;
-                case "User":
-
-                    log(tcpConnection, value);
-                    for (User u : usersData)
-                        if (u.getId() == Integer.parseInt(vals[2])) {
-                            try {
-                                u.set(connDB, vals[1], vals[3]);
-                            } catch (SQLException e) {
-                                e.printStackTrace();
+                        log(tcpConnection, value);
+                        for (Client c : clientsData)
+                            if (c.getId() == Integer.parseInt(vals[2])) {
+                                c.set(connDB, vals[1], vals[3]);
+                                break;
                             }
-                            break;
-                        }
-                    break;
-                case "addUser":
-                    log(tcpConnection, value);
-                    System.out.println(value.substring(8));
-                    addUser(value.substring(8));
-                    break;
-                case "addClient":
-                    log(tcpConnection, value);
-                    System.out.println(value.substring(10));
-                    addClient(value.substring(10));
-                    break;
-                case "changeAccountData":
-                    log(tcpConnection, value);
-                    System.out.println(value.substring(18));
-                    changeAccountData(vals[1], vals[2], vals[3], vals[4]);
-                    break;
-                case "deleteAllUsers":
-                    log(tcpConnection, value);
-                    deleteAllUsers();
-                    break;
-                case "setCurrentUser":
-                    System.out.println(value.substring(15));
-                    if (vals[1].equals("null"))
-                        log += getCurrentDateTime() + " " + tcpConnection + " \'" + tcpConnection.getUsername() + "\' logged out\n";
-                    else
-                        log += getCurrentDateTime() + " " + tcpConnection + " \'" + vals[1] + "\' logged in\n";
-                    tcpConnection.setUsername(vals[1]);
+                        break;
+                    case "User":
+
+                        log(tcpConnection, value);
+                        for (User u : usersData)
+                            if (u.getId() == Integer.parseInt(vals[2])) {
+                                try {
+                                    u.set(connDB, vals[1], vals[3]);
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                            }
+                        break;
+                    case "addUser":
+                        log(tcpConnection, value);
+                        System.out.println(value.substring(8));
+                        addUser(value.substring(8));
+                        break;
+                    case "addClient":
+                        log(tcpConnection, value);
+                        System.out.println(value.substring(10));
+                        addClient(value.substring(10));
+                        break;
+                    case "changeAccountData":
+                        log(tcpConnection, value);
+                        System.out.println(value.substring(18));
+                        changeAccountData(vals[1], vals[2], vals[3], vals[4]);
+                        break;
+                    case "deleteAllUsers":
+                        log(tcpConnection, value);
+                        deleteAllUsers();
+                        break;
+                    case "setCurrentUser":
+                        System.out.println(value.substring(15));
+                        if (vals[1].equals("null"))
+                            log +=
+                                    getCurrentDateTime() + " " + tcpConnection + " \'" + tcpConnection.getUsername() + "\' logged out\n";
+                        else
+                            log += getCurrentDateTime() + " " + tcpConnection + " \'" + vals[1] + "\' logged in\n";
+                        tcpConnection.setUsername(vals[1]);
 
 
-                    break;
-                default:
-                    log(tcpConnection, value);
+                        break;
+                    default:
+                        log(tcpConnection, value);
+                }
             }
         }
     }
@@ -331,7 +407,6 @@ public class Server extends Application implements TCPConnectionListener {
     public synchronized void onDisconnect(TCPConnection tcpConnection) {
         Platform.runLater(() -> {
             log += getCurrentDateTime() + " " + tcpConnection + " DISCONNECTED\n";
-            System.out.println(log);
         });
         connections.remove(tcpConnection);
     }
@@ -511,9 +586,7 @@ public class Server extends Application implements TCPConnectionListener {
         primaryStage.setMaximized(false);
         primaryStage.setScene(scene);
         primaryStage.show();
-        new Thread(() -> {
-            new Server().listen();
-        }).start();
+        new Thread(this::listen).start();
     }
 
     @Override

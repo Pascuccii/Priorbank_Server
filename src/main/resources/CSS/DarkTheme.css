@@ -453,3 +453,10 @@
     -fx-pref-width: 20px;
     -fx-pref-height: 25px;
 }
+
+.languageButton {
+    -fx-background-size: 25px;
+    -fx-background-position: 9px 1px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-image: url(../assets/english.png);
+}

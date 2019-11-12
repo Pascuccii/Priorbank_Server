@@ -27,6 +27,7 @@ public class TCPConnection {
             @Override
             public void run() {
                 try {
+
                     eventListener.onConnectionReady(TCPConnection.this);
                     while (!rxThread.isInterrupted()) {
                         eventListener.onReceiveString(TCPConnection.this, in.readLine());
@@ -55,7 +56,8 @@ public class TCPConnection {
             out.flush();
         } catch (IOException e) {
             eventListener.onException(TCPConnection.this, e);
-            disconnect();
+            if(!value.equals("close"))
+                disconnect();
         }
     }
 
@@ -80,8 +82,9 @@ public class TCPConnection {
     }
 
     public synchronized void disconnect() {
-        rxThread.interrupt();
         try {
+            sendString("close");
+            rxThread.interrupt();
             socket.close();
         } catch (IOException e) {
             eventListener.onException(TCPConnection.this, e);
@@ -94,6 +97,10 @@ public class TCPConnection {
 
     public String getPort() {
         return port;
+    }
+
+    public boolean isClosed() {
+        return socket.isClosed();
     }
 
     @Override
