@@ -45,6 +45,7 @@
                     <items>
                       <MenuItem fx:id="serverOnMenuItem" mnemonicParsing="false" text="ON" />
                       <MenuItem fx:id="serverOffMenuItem" mnemonicParsing="false" text="OFF" />
+                        <MenuItem mnemonicParsing="false" text="STOP" />
                     </items>
                   </MenuButton>
                   <Button fx:id="languageButton" layoutX="726.6" layoutY="20.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="42.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="20.0" />

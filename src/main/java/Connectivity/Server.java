@@ -21,17 +21,18 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.sql.*;
-import java.time.Instant;
-import java.time.Month;
 import java.time.ZonedDateTime;
 
 import static java.lang.Thread.sleep;
 
 public class Server extends Application implements TCPConnectionListener {
 
+    private volatile boolean freezed = false;
     private volatile static String log = "";
     private volatile static ObservableList<TCPConnection> connections = FXCollections.observableArrayList();
     private final DatabaseConnection connDB;
@@ -112,6 +113,8 @@ public class Server extends Application implements TCPConnectionListener {
 
     @FXML
     void initialize() {
+        Tooltip tooltip = new Tooltip("This is a tooltip");
+        Tooltip.install(serverOnOffMenuButton, tooltip);
         ipColumn.setCellValueFactory(new PropertyValueFactory<>("ip"));
         portColumn.setCellValueFactory(new PropertyValueFactory<>("port"));
         userColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
@@ -135,6 +138,11 @@ public class Server extends Application implements TCPConnectionListener {
             System.exit(0);
         });
         languageButton.setOnAction(event -> translate());
+        saveButton.setOnAction(event -> saveLog());
+        clearButton.setOnAction(event -> {
+            textAreaLog.setText("");
+            log = "";
+        });
         emptyLabel = new Label("No connections");
         serverOnMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOnMenuItem.getText()));
         serverOffMenuItem.setOnAction(event -> serverOnOffMenuButton.setText(serverOffMenuItem.getText()));
@@ -195,7 +203,7 @@ public class Server extends Application implements TCPConnectionListener {
     public void listen() {
         System.out.println("listening");
         try (ServerSocket serverSocket = new ServerSocket(8189)) {
-            while (true) {
+            while (!freezed) {
                 try {
                     connections.add(new TCPConnection(this, serverSocket.accept()));
                 } catch (IOException e) {
@@ -208,9 +216,8 @@ public class Server extends Application implements TCPConnectionListener {
         }
     }
 
-    @Override
-    public synchronized void onConnectionReady(TCPConnection tcpConnection) {
-        Platform.runLater(() -> {
+    public void saveLog() {
+        try {
             ZonedDateTime zdt = ZonedDateTime.now();
             String year = String.valueOf(zdt.getYear());
             String month = String.valueOf(zdt.getMonthValue());
@@ -218,21 +225,31 @@ public class Server extends Application implements TCPConnectionListener {
             String hour = String.valueOf(zdt.getHour());
             String minute = String.valueOf(zdt.getMinute());
             String second = String.valueOf(zdt.getSecond());
+            String path = "log-" + year  + month  + day + "(" + hour + "h" + minute + "m" + second + "s).txt";
+            File savedLog = new File(path);
+            FileWriter lastConfigWriter = new FileWriter(savedLog, false);
+            if (!savedLog.exists())
+                if (savedLog.createNewFile())
+                    System.out.println(path + " created.");
 
-            log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " CONNECTED\n";
+            lastConfigWriter.write(log);
+            log += getCurrentDateTime() + " log saved to " + path + "\n";
+            lastConfigWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public synchronized void onConnectionReady(TCPConnection tcpConnection) {
+        Platform.runLater(() -> {
+            log += getCurrentDateTime() + " " + tcpConnection + " CONNECTED\n";
             System.out.println(log);
         });
     }
 
     @Override
     public synchronized void onReceiveString(TCPConnection tcpConnection, String value) {
-        ZonedDateTime zdt = ZonedDateTime.now();
-        String year = String.valueOf(zdt.getYear());
-        String month = String.valueOf(zdt.getMonthValue());
-        String day = String.valueOf(zdt.getDayOfMonth());
-        String hour = String.valueOf(zdt.getHour());
-        String minute = String.valueOf(zdt.getMinute());
-        String second = String.valueOf(zdt.getSecond());
 
         System.out.println(value);
         if (value.equals("init")) {
@@ -297,9 +314,9 @@ public class Server extends Application implements TCPConnectionListener {
                 case "setCurrentUser":
                     System.out.println(value.substring(15));
                     if (vals[1].equals("null"))
-                        log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " \'" + tcpConnection.getUsername() + "\' logged out\n";
+                        log += getCurrentDateTime() + " " + tcpConnection + " \'" + tcpConnection.getUsername() + "\' logged out\n";
                     else
-                        log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " \'" + vals[1] + "\' logged in\n";
+                        log += getCurrentDateTime() + " " + tcpConnection + " \'" + vals[1] + "\' logged in\n";
                     tcpConnection.setUsername(vals[1]);
 
 
@@ -312,15 +329,8 @@ public class Server extends Application implements TCPConnectionListener {
 
     @Override
     public synchronized void onDisconnect(TCPConnection tcpConnection) {
-        ZonedDateTime zdt = ZonedDateTime.now();
-        String year = String.valueOf(zdt.getYear());
-        String month = String.valueOf(zdt.getMonthValue());
-        String day = String.valueOf(zdt.getDayOfMonth());
-        String hour = String.valueOf(zdt.getHour());
-        String minute = String.valueOf(zdt.getMinute());
-        String second = String.valueOf(zdt.getSecond());
         Platform.runLater(() -> {
-            log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcpConnection + " DISCONNECTED\n";
+            log += getCurrentDateTime() + " " + tcpConnection + " DISCONNECTED\n";
             System.out.println(log);
         });
         connections.remove(tcpConnection);
@@ -468,7 +478,7 @@ public class Server extends Application implements TCPConnectionListener {
 
     private void changeAccountData(String id, String username, String password, String email) {
         try {
-            if(email.equals("null"))
+            if (email.equals("null"))
                 email = null;
             String prepStat = "UPDATE `test`.`users` SET `name` = ?, `password` = ?, `email` = ? WHERE (`id` = ?);";
             PreparedStatement preparedStatement = connDB.getConnection().prepareStatement(prepStat);
@@ -520,15 +530,7 @@ public class Server extends Application implements TCPConnectionListener {
     }
 
     public void log(TCPConnection tcp, String value) {
-        ZonedDateTime zdt = ZonedDateTime.now();
-        String year = String.valueOf(zdt.getYear());
-        String month = String.valueOf(zdt.getMonthValue());
-        String day = String.valueOf(zdt.getDayOfMonth());
-        String hour = String.valueOf(zdt.getHour());
-        String minute = String.valueOf(zdt.getMinute());
-        String second = String.valueOf(zdt.getSecond());
-
-        log += year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second + " " + tcp + " " + tcp.getUsername() + ": " + value + "\n";
+        log += getCurrentDateTime() + " " + tcp + " " + tcp.getUsername() + ": " + value + "\n";
     }
 
     private void minimize() {
@@ -542,5 +544,17 @@ public class Server extends Application implements TCPConnectionListener {
             minimizeButton.setStyle("-fx-background-image: url(assets/minimize-white.png)");
         }
     }
-    //TODO: currentUser
+
+    private String getCurrentDateTime() {
+        ZonedDateTime zdt = ZonedDateTime.now();
+        String year = String.valueOf(zdt.getYear());
+        String month = String.valueOf(zdt.getMonthValue());
+        String day = String.valueOf(zdt.getDayOfMonth());
+        String hour = String.valueOf(zdt.getHour());
+        String minute = String.valueOf(zdt.getMinute());
+        String second = String.valueOf(zdt.getSecond());
+        return year + "/" + month + "/" + day + "-" + hour + ":" + minute + ":" + second;
+    }
+
+    //TODO: кнопки на сервере
 }
