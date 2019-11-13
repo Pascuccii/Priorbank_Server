@@ -30,6 +30,24 @@
     -fx-background-color: #282828;
     -fx-border-color: #7d7d7d;
     -fx-font-weight: bold;
+    -fx-vbar-policy: ALWAYS;
+}
+
+.table-view *.scroll-bar:horizontal *.increment-button,
+.table-view *.scroll-bar:horizontal *.decrement-button {
+    -fx-background-color: null;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.table-view *.scroll-bar:horizontal *.increment-arrow,
+.table-view *.scroll-bar:horizontal *.decrement-arrow {
+    -fx-background-color: null;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-shape: null;
 }
 
 .table-view .column-header-background {
@@ -113,7 +131,7 @@
 }
 
 .button {
-    -fx-background-color: #383838;
+    -fx-background-color: linear-gradient(from 15px 23px to 17px 40px, rgb(60, 60, 60), rgb(69, 69, 69));
     -fx-background-radius: 0;
     -fx-border-radius: 0;
     -fx-border-color: #777777;
@@ -210,8 +228,7 @@
 }
 
 .title {
-    -fx-background-color: #282828;
-    -fx-opacity: 0.9;
+    -fx-background-color: linear-gradient(from 200px 0px to 600px 0px, rgb(40, 40, 40), rgba(52, 52, 52, 0.82));
 }
 
 .root {
@@ -256,19 +273,46 @@
     -fx-vbar-policy: ALWAYS;
 }
 
+
+.text-area .scroll-pane .scroll-bar .thumb {
+    -fx-background-color: linear-gradient(from 25px 25px to 100px 100px, #D8D8D8, #c4c4c4);
+}
+
 .table-view {
     -fx-hbar-policy: NEVER;
 }
 
+.text-area .scroll-pane {
+    -fx-hbar-policy: ALWAYS;
+    -fx-vbar-policy: ALWAYS;
+}
+.table-view .filler {
+    -fx-background-color: #282828;
+}
+.table-view .corner {
+    -fx-background-color: #383838;
+}
+.text-area .corner {
+    -fx-background-color: #383838;
+}
+
+
+
 .text-area .content{
     -fx-font-family: Monospaced;
     -fx-text-fill: #D8D8D8;
+    -fx-background-color: #282828;
+    -fx-font-weight: bold;
+    -fx-border-color: #282828;
+    -fx-border-width: 2px;
+}
+
+.text-area .scroll-pane{
     -fx-border-radius: 3;
     -fx-background-radius: 1;
-    -fx-background-color: #282828;
     -fx-border-color: #7d7d7d;
-    -fx-font-weight: bold;
 }
+
 
 .loginPane {
     -fx-background-color: #383838;
@@ -301,7 +345,7 @@
 }
 
 .menu-button {
-    -fx-background-color: #383838;
+    -fx-background-color: linear-gradient(from 15px 23px to 17px 40px, rgb(60, 60, 60), rgb(69, 69, 69));
     -fx-background-radius: 0;
     -fx-border-radius: 0;
     -fx-border-width: 1;

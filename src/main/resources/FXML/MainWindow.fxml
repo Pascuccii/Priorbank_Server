@@ -21,7 +21,7 @@
             <Button fx:id="hideButton" focusTraversable="false" layoutX="517.4" layoutY="3.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" AnchorPane.rightAnchor="55.0" AnchorPane.topAnchor="3.0" />
             <Button fx:id="minimizeButton" focusTraversable="false" layoutX="543.4" layoutY="3.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" AnchorPane.rightAnchor="29.0" AnchorPane.topAnchor="3.0" />
             <Button fx:id="exitButton" focusTraversable="false" layoutX="569.4" layoutY="3.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="3.0" />
-            <Label fx:id="titleLabel" layoutX="14.0" layoutY="6.0" prefHeight="18.0" prefWidth="370.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="413.6" AnchorPane.topAnchor="6.0" />
+            <Label fx:id="titleLabel" layoutX="14.0" layoutY="6.0" prefHeight="18.0" prefWidth="370.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="413.6" AnchorPane.topAnchor="7.0" />
          </children>
          <padding>
             <Insets bottom="3.0" />
@@ -60,7 +60,17 @@
                   </MenuButton>
                   <Button fx:id="languageButton" layoutX="726.6" layoutY="20.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="42.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="20.0" />
                   <Label fx:id="serverLabel" layoutX="364.0" layoutY="26.0" prefHeight="18.0" prefWidth="50.0" text="Server:" AnchorPane.leftAnchor="364.0" AnchorPane.topAnchor="25.0" />
-                  <ImageView fitHeight="19.0" fitWidth="19.0" layoutX="752.0" layoutY="424.0" pickOnBounds="true" x="1.0" y="1.0" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0">
+                  <ImageView fitHeight="19.0" fitWidth="19.0" layoutX="752.0" layoutY="424.0" pickOnBounds="true" visible="false" x="1.0" y="1.0" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0">
+                     <image>
+                        <Image url="@../assets/fix-black-2.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fitHeight="26.0" fitWidth="14.0" layoutX="319.0" layoutY="47.0" pickOnBounds="true" visible="false" AnchorPane.leftAnchor="324.0" AnchorPane.topAnchor="21.0">
+                     <image>
+                        <Image url="@../assets/fix-black.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fitHeight="14.0" fitWidth="14.0" layoutX="324.0" layoutY="427.20000000000016" pickOnBounds="true" visible="false" AnchorPane.bottomAnchor="20.79999999999984" AnchorPane.leftAnchor="324.0">
                      <image>
                         <Image url="@../assets/fix-black-2.png" />
                      </image>

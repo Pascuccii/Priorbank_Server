@@ -167,20 +167,18 @@ public class Server extends Application implements TCPConnectionListener {
         });
         emptyLabel = new Label("No connections");
         try {
-            URL whatismyip = new URL("http://checkip.amazonaws.com");
-            BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
-            String ip = in.readLine(); //you get the IP as a String
-            titleLabel.setText(ip);
+            titleLabel.setText(Inet4Address.getLocalHost().getHostAddress() + ":" + serverSocket.getLocalPort());
         } catch (IOException e) {
             e.printStackTrace();
         }
         serverOnMenuItem.setOnAction(event -> {
             if (serverState != 1) {
                 serverOnOffMenuButton.setText(serverOnMenuItem.getText());
+                serverOnOffMenuButton.setStyle("-fx-text-fill: linear-gradient(from 8px 0px to 20px 0px, rgba(108, 246, 3, 0.95), rgba(0, 234, 11, 0.7))");
                 serverState = 1;
                 try {
                     serverSocket = new ServerSocket(8189);
-                    titleLabel.setText(serverSocket.getInetAddress().toString() + " " + serverSocket.getLocalPort());
+                    titleLabel.setText(Inet4Address.getLocalHost().getHostAddress() + ":" + serverSocket.getLocalPort());
                     serverSocket.setSoTimeout(1000);
                 } catch (IOException e) {
                     e.printStackTrace();
