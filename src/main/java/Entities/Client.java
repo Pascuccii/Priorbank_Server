@@ -570,7 +570,10 @@ public class Client implements Serializable {
     }
 
     public String getHomeNumber() {
-        return homeNumber;
+        if (homeNumber == null)
+            return "";
+        else
+            return homeNumber;
     }
 
     public void setHomeNumber(String homeNumber) {
@@ -578,7 +581,10 @@ public class Client implements Serializable {
     }
 
     public String getMobileNumber() {
-        return mobileNumber;
+        if (mobileNumber == null)
+            return "";
+        else
+            return mobileNumber;
     }
 
     public void setMobileNumber(String mobileNumber) {
@@ -586,7 +592,10 @@ public class Client implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        if (email == null)
+            return "";
+        else
+            return email;
     }
 
     public void setEmail(String email) {
@@ -594,7 +603,10 @@ public class Client implements Serializable {
     }
 
     public String getJob() {
-        return job;
+        if (job == null)
+            return "";
+        else
+            return job;
     }
 
     public void setJob(String job) {
@@ -602,7 +614,10 @@ public class Client implements Serializable {
     }
 
     public String getPosition() {
-        return position;
+        if (position == null)
+            return "";
+        else
+            return position;
     }
 
     public void setPosition(String position) {
@@ -650,7 +665,10 @@ public class Client implements Serializable {
     }
 
     public String getMonthlyIncome() {
-        return monthlyIncome;
+        if (monthlyIncome == null)
+            return "";
+        else
+            return monthlyIncome;
     }
 
     public void setMonthlyIncome(String monthlyIncome) {

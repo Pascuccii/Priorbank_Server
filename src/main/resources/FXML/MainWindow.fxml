@@ -21,6 +21,7 @@
             <Button fx:id="hideButton" focusTraversable="false" layoutX="517.4" layoutY="3.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" AnchorPane.rightAnchor="55.0" AnchorPane.topAnchor="3.0" />
             <Button fx:id="minimizeButton" focusTraversable="false" layoutX="543.4" layoutY="3.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" AnchorPane.rightAnchor="29.0" AnchorPane.topAnchor="3.0" />
             <Button fx:id="exitButton" focusTraversable="false" layoutX="569.4" layoutY="3.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="3.0" />
+            <Label fx:id="titleLabel" layoutX="14.0" layoutY="6.0" prefHeight="18.0" prefWidth="370.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="413.6" AnchorPane.topAnchor="6.0" />
          </children>
          <padding>
             <Insets bottom="3.0" />
