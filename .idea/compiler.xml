@@ -6,11 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="FLS_Server" />
+        <module name="Priorbank_Server" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="11">
       <module name="FLS" target="11" />
+      <module name="Prior" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
